@@ -34,12 +34,12 @@ export class FileNameService {
     let directoryNamingStyle: string | undefined = undefined;
     if (this.settings.analyzeDirectoryNamingStyle) {
       if (this.settings.debugMode) {
-        console.log('[FileNameService] 开始分析目录命名风格...');
+        console.debug('[FileNameService] 开始分析目录命名风格...');
       }
       try {
-        directoryNamingStyle = await this.fileAnalyzer.analyzeDirectoryNamingStyle(file, this.settings.debugMode);
+        directoryNamingStyle = this.fileAnalyzer.analyzeDirectoryNamingStyle(file, this.settings.debugMode);
         if (this.settings.debugMode) {
-          console.log('[FileNameService] 目录命名风格分析完成:', directoryNamingStyle || '(空)');
+          console.debug('[FileNameService] 目录命名风格分析完成:', directoryNamingStyle || '(空)');
         }
       } catch (error) {
         console.warn('[FileNameService] 分析目录命名风格失败:', error);
@@ -47,14 +47,14 @@ export class FileNameService {
       }
     } else {
       if (this.settings.debugMode) {
-        console.log('[FileNameService] 目录命名风格分析已禁用');
+        console.debug('[FileNameService] 目录命名风格分析已禁用');
       }
     }
 
     // 调用 AI 服务生成新文件名
     if (this.settings.debugMode) {
-      console.log('[FileNameService] 调用 AI 服务生成文件名...');
-      console.log('[FileNameService] 参数:', {
+      console.debug('[FileNameService] 调用 AI 服务生成文件名...');
+      console.debug('[FileNameService] 参数:', {
         contentLength: content.length,
         currentFileName,
         hasDirectoryStyle: !!directoryNamingStyle,
@@ -70,7 +70,7 @@ export class FileNameService {
     );
 
     if (this.settings.debugMode) {
-      console.log('[FileNameService] AI 生成的文件名:', newFileName);
+      console.debug('[FileNameService] AI 生成的文件名:', newFileName);
     }
 
     // 验证和清理文件名

@@ -19,7 +19,9 @@ class RenameConfigModal extends Modal {
     const { contentEl } = this;
     contentEl.empty();
 
-    contentEl.createEl('h2', { text: '重命名配置' });
+    new Setting(contentEl)
+      .setName('重命名配置')
+      .setHeading();
 
     // 创建输入框
     const inputContainer = contentEl.createDiv({ cls: 'setting-item' });
@@ -27,18 +29,22 @@ class RenameConfigModal extends Modal {
       type: 'text',
       value: this.currentName
     });
-    input.style.width = '100%';
-    input.style.padding = '8px';
-    input.style.marginBottom = '16px';
+    input.setCssProps({
+      width: '100%',
+      padding: '8px',
+      'margin-bottom': '16px'
+    });
 
     // 选中当前文本
     input.select();
 
     // 创建按钮容器
     const buttonContainer = contentEl.createDiv({ cls: 'modal-button-container' });
-    buttonContainer.style.display = 'flex';
-    buttonContainer.style.justifyContent = 'flex-end';
-    buttonContainer.style.gap = '8px';
+    buttonContainer.setCssProps({
+      display: 'flex',
+      'justify-content': 'flex-end',
+      gap: '8px'
+    });
 
     // 取消按钮
     const cancelButton = buttonContainer.createEl('button', { text: '取消' });
@@ -99,12 +105,16 @@ export class AIFileNamerSettingTab extends PluginSettingTab {
     const { containerEl } = this;
     containerEl.empty();
 
-    containerEl.createEl('h2', { text: 'AI Note Renamer' });
+    new Setting(containerEl)
+      .setName('AI Note Renamer')
+      .setHeading();
 
     // GitHub Feedback Link
     const feedbackContainer = containerEl.createDiv({ cls: 'setting-item-description' });
-    feedbackContainer.style.marginTop = '-10px';
-    feedbackContainer.style.marginBottom = '20px';
+    feedbackContainer.setCssProps({
+      'margin-top': '-10px',
+      'margin-bottom': '20px'
+    });
     feedbackContainer.appendText('谢谢你的使用~欢迎反馈！戳这里：');
     feedbackContainer.createEl('a', {
       text: 'GitHub',
@@ -187,7 +197,7 @@ export class AIFileNamerSettingTab extends PluginSettingTab {
         }))
       .addButton(button => button
         .setButtonText('配置重命名')
-        .onClick(async () => {
+        .onClick(() => {
           const config = this.plugin.settings.configs.find(
             c => c.id === this.plugin.settings.activeConfigId
           );
@@ -230,7 +240,9 @@ export class AIFileNamerSettingTab extends PluginSettingTab {
           this.display();
         }));
 
-    containerEl.createEl('h3', { text: `配置: ${currentConfig?.name || '默认配置'}` });
+    new Setting(containerEl)
+      .setName(`配置: ${currentConfig?.name || '默认配置'}`)
+      .setHeading();
   }
 
   /**
@@ -292,9 +304,11 @@ export class AIFileNamerSettingTab extends PluginSettingTab {
       if (value.trim()) {
         const previewText = previewContainer.createDiv();
         previewText.setText(`实际请求地址: ${normalized.url}`);
-        previewText.style.color = 'var(--text-muted)';
-        previewText.style.fontSize = '0.9em';
-        previewText.style.marginTop = '4px';
+        previewText.setCssProps({
+          color: 'var(--text-muted)',
+          'font-size': '0.9em',
+          'margin-top': '4px'
+        });
       }
     };
 
@@ -303,7 +317,7 @@ export class AIFileNamerSettingTab extends PluginSettingTab {
 
     // API Key
     new Setting(containerEl)
-      .setName('API Key')
+      .setName('API key')
       .setDesc('您的 API 密钥')
       .addText(text => {
         text
@@ -343,7 +357,7 @@ export class AIFileNamerSettingTab extends PluginSettingTab {
 
     // Max Tokens
     new Setting(containerEl)
-      .setName('Max Tokens')
+      .setName('Max tokens')
       .setDesc('生成的最大 token 数量')
       .addText(text => text
         .setPlaceholder('100')
@@ -358,7 +372,7 @@ export class AIFileNamerSettingTab extends PluginSettingTab {
 
     // Top P
     new Setting(containerEl)
-      .setName('Top P')
+      .setName('Top p')
       .setDesc('控制文件名用词的多样性。值越小生成的文件名用词越常见、简洁；值越大用词范围越广、越丰富。建议保持默认值 1.0')
       .addSlider(slider => slider
         .setLimits(0, 1, 0.05)
@@ -370,15 +384,24 @@ export class AIFileNamerSettingTab extends PluginSettingTab {
         }));
 
     // Prompt 模板
-    containerEl.createEl('h4', { text: 'Prompt 模板' });
+    new Setting(containerEl)
+      .setName('Prompt 模板')
+      .setHeading();
 
     const promptDesc = containerEl.createEl('div', { cls: 'setting-item-description' });
-    promptDesc.innerHTML = `
-      自定义发送给 AI 的提示词模板。支持的变量：<br>
-      • <code>{{content}}</code> - 笔记内容<br>
-      • <code>{{currentFileName}}</code> - 当前文件名<br>
-      • <code>{{#if currentFileName}}...{{/if}}</code> - 条件块
-    `;
+    promptDesc.appendText('自定义发送给 AI 的提示词模板。支持的变量：');
+    promptDesc.createEl('br');
+    promptDesc.appendText('• ');
+    promptDesc.createEl('code', { text: '{{content}}' });
+    promptDesc.appendText(' - 笔记内容');
+    promptDesc.createEl('br');
+    promptDesc.appendText('• ');
+    promptDesc.createEl('code', { text: '{{currentFileName}}' });
+    promptDesc.appendText(' - 当前文件名');
+    promptDesc.createEl('br');
+    promptDesc.appendText('• ');
+    promptDesc.createEl('code', { text: '{{#if currentFileName}}...{{/if}}' });
+    promptDesc.appendText(' - 条件块');
 
     new Setting(containerEl)
       .addTextArea(text => {
@@ -416,7 +439,9 @@ export class AIFileNamerSettingTab extends PluginSettingTab {
    * 渲染高级设置
    */
   private renderAdvancedSettings(containerEl: HTMLElement): void {
-    containerEl.createEl('h3', { text: '高级设置' });
+    new Setting(containerEl)
+      .setName('高级设置')
+      .setHeading();
 
     // 使用当前文件名上下文
     new Setting(containerEl)
@@ -440,16 +465,6 @@ export class AIFileNamerSettingTab extends PluginSettingTab {
           await this.plugin.saveSettings();
         }));
 
-    // 调试模式
-    new Setting(containerEl)
-      .setName('调试模式')
-      .setDesc('开启后在浏览器控制台显示详细的调试日志（包括 Prompt 内容、目录分析结果等）')
-      .addToggle(toggle => toggle
-        .setValue(this.plugin.settings.debugMode)
-        .onChange(async (value) => {
-          await this.plugin.saveSettings();
-        }));
-
     // 请求超时
     new Setting(containerEl)
       .setName('请求超时时间 (秒)')
@@ -463,6 +478,17 @@ export class AIFileNamerSettingTab extends PluginSettingTab {
             this.plugin.settings.timeout = numValue * 1000;
             await this.plugin.saveSettings();
           }
+        }));
+
+    // 调试模式
+    new Setting(containerEl)
+      .setName('调试模式')
+      .setDesc('开启后在浏览器控制台显示详细的调试日志（包括 Prompt 内容、目录分析结果等）')
+      .addToggle(toggle => toggle
+        .setValue(this.plugin.settings.debugMode)
+        .onChange(async (value) => {
+          this.plugin.settings.debugMode = value;
+          await this.plugin.saveSettings();
         }));
   }
 
@@ -574,16 +600,5 @@ export class AIFileNamerSettingTab extends PluginSettingTab {
     } catch {
       return null;
     }
-  }
-
-  /**
-   * 转义 HTML 特殊字符
-   * @param text 原始文本
-   * @returns 转义后的文本
-   */
-  private escapeHtml(text: string): string {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
   }
 }

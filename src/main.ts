@@ -19,7 +19,7 @@ export default class AIFileNamerPlugin extends Plugin {
    * 插件加载时调用
    */
   async onload() {
-    console.log('加载 AI File Namer 插件');
+    console.debug('加载 AI File Namer 插件');
 
     // 加载设置
     await this.loadSettings();
@@ -48,7 +48,7 @@ export default class AIFileNamerPlugin extends Plugin {
 
     // 添加编辑器右键菜单
     this.registerEvent(
-      this.app.workspace.on('editor-menu', (menu: Menu, editor, view) => {
+      this.app.workspace.on('editor-menu', (menu: Menu, _editor, _view) => {
         menu.addItem((item) => {
           item
             .setTitle('生成 AI 文件名')
@@ -215,6 +215,6 @@ export default class AIFileNamerPlugin extends Plugin {
    * 插件卸载时调用
    */
   onunload() {
-    console.log('卸载 AI File Namer 插件');
+    console.debug('卸载 AI File Namer 插件');
   }
 }

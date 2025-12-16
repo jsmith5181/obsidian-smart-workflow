@@ -1,5 +1,19 @@
-import { App, requestUrl } from 'obsidian';
+import { App, requestUrl, RequestUrlResponse } from 'obsidian';
 import { AIFileNamerSettings, APIConfig, BASE_PROMPT_TEMPLATE } from '../settings/settings';
+
+/**
+ * API 响应数据接口
+ */
+interface APIResponse {
+  choices?: Array<{
+    message?: {
+      content?: string;
+    };
+  }>;
+  error?: {
+    message?: string;
+  };
+}
 
 /**
  * AI 服务类
@@ -56,10 +70,10 @@ export class AIService {
     const prompt = this.renderPrompt(template, variables);
 
     if (this.settings.debugMode) {
-      console.log('[AIService] 发送给 AI 的 Prompt:');
-      console.log('='.repeat(50));
-      console.log(prompt);
-      console.log('='.repeat(50));
+      console.debug('[AIService] 发送给 AI 的 Prompt:');
+      console.debug('='.repeat(50));
+      console.debug(prompt);
+      console.debug('='.repeat(50));
     }
 
     // 构建请求体
@@ -98,7 +112,7 @@ export class AIService {
         throw: false // 不自动抛出错误，手动处理
       });
 
-      const response = await Promise.race([requestPromise, timeoutPromise]) as any;
+      const response = await Promise.race([requestPromise, timeoutPromise]) as RequestUrlResponse;
 
       // 检查响应状态
       if (response.status !== 200) {
@@ -122,7 +136,7 @@ export class AIService {
           if (errorData && errorData.error && errorData.error.message) {
             errorMessage += `\n错误详情: ${errorData.error.message}`;
           }
-        } catch (e) {
+        } catch {
           // 无法解析错误信息，使用默认消息
         }
         throw new Error(errorMessage);
@@ -143,7 +157,7 @@ export class AIService {
    * @param response API 响应数据
    * @returns 提取的文件名
    */
-  private parseResponse(response: any): string {
+  private parseResponse(response: APIResponse): string {
     try {
       if (!response || !response.choices || response.choices.length === 0) {
         throw new Error('API 响应格式错误：缺少 choices 字段');
@@ -232,7 +246,7 @@ export class AIService {
    * @param maxChars 最大字符数（默认 3000）
    * @returns 截取后的内容
    */
-  private smartTruncateContent(content: string, maxChars: number = 3000): string {
+  private smartTruncateContent(content: string, maxChars = 3000): string {
     // 如果内容不超过限制，直接返回
     if (content.length <= maxChars) {
       return content;
@@ -340,7 +354,7 @@ export class AIService {
         else if (pathname === '/chat' || pathname === '/chat/') {
           normalized = normalized.replace(/\/chat\/?$/, '') + '/chat/completions';
         }
-      } catch (e) {
+      } catch {
         // URL 解析失败，保持原样
       }
     }
@@ -400,7 +414,7 @@ export class AIService {
         throw: false
       });
 
-      const response = await Promise.race([requestPromise, timeoutPromise]) as any;
+      const response = await Promise.race([requestPromise, timeoutPromise]) as RequestUrlResponse;
 
       if (response.status !== 200) {
         let errorMessage = `API 请求失败 (${response.status})`;
@@ -412,7 +426,9 @@ export class AIService {
           if (errorData?.error?.message) {
             errorMessage += ` - ${errorData.error.message}`;
           }
-        } catch { }
+        } catch {
+          // 无法解析错误信息，忽略
+        }
 
         throw new Error(errorMessage);
       }
