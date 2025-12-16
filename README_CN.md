@@ -18,6 +18,10 @@
     *   智能 API 端点补全与修正。
     *   自定义请求超时时间。
 
+## 📸 界面预览
+
+![设置面板](https://test.fukit.cn/autoupload/f/KTO6-pUlsq3zQ-YJ9ppdgtiO_OyvX7mIgxFBfDMDErs/20251216/ZXhm/779X787/QQ20251216-145137.png/webp)
+
 ## 🚀 安装
 
 ### 手动安装（推荐）

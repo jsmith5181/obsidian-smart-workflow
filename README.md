@@ -20,6 +20,10 @@
     *   Intelligent API endpoint completion and correction.
     *   Customizable request timeout settings.
 
+## 📸 Screenshots
+
+![Settings Panel](https://test.fukit.cn/autoupload/f/KTO6-pUlsq3zQ-YJ9ppdgtiO_OyvX7mIgxFBfDMDErs/20251216/ZXhm/779X787/QQ20251216-145137.png/webp)
+
 ## 🚀 Installation
 
 ### Manual Installation (Recommended)

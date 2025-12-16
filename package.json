@@ -1,6 +1,6 @@
 {
   "name": "obsidian-ai-note-renamer",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "description": "AI-powered plugin that automatically generates intelligent, context-aware filenames from note content.",
   "main": "main.js",
   "scripts": {
