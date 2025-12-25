@@ -2,6 +2,7 @@ import { App, TFile } from 'obsidian';
 import { AIService } from './aiService';
 import { FileAnalyzer } from './fileAnalyzer';
 import { AIFileNamerSettings } from '../../settings/settings';
+import { debugLog, debugWarn } from '../../utils/logger';
 
 /**
  * 重命名结果接口
@@ -49,27 +50,27 @@ export class FileNameService {
     let directoryNamingStyle: string | undefined = undefined;
     if (this.settings.analyzeDirectoryNamingStyle) {
       if (this.settings.debugMode) {
-        console.debug('[FileNameService] 开始分析目录命名风格...');
+        debugLog('[FileNameService] 开始分析目录命名风格...');
       }
       try {
         directoryNamingStyle = this.fileAnalyzer.analyzeDirectoryNamingStyle(file, this.settings.debugMode);
         if (this.settings.debugMode) {
-          console.debug('[FileNameService] 目录命名风格分析完成:', directoryNamingStyle || '(空)');
+          debugLog('[FileNameService] 目录命名风格分析完成:', directoryNamingStyle || '(空)');
         }
       } catch (error) {
-        console.warn('[FileNameService] 分析目录命名风格失败:', error);
+        debugWarn('[FileNameService] 分析目录命名风格失败:', error);
         // 继续执行，不阻塞主流程
       }
     } else {
       if (this.settings.debugMode) {
-        console.debug('[FileNameService] 目录命名风格分析已禁用');
+        debugLog('[FileNameService] 目录命名风格分析已禁用');
       }
     }
 
     // 调用 AI 服务生成新文件名
     if (this.settings.debugMode) {
-      console.debug('[FileNameService] 调用 AI 服务生成文件名...');
-      console.debug('[FileNameService] 参数:', {
+      debugLog('[FileNameService] 调用 AI 服务生成文件名...');
+      debugLog('[FileNameService] 参数:', {
         contentLength: content.length,
         currentFileName,
         hasDirectoryStyle: !!directoryNamingStyle,
@@ -85,7 +86,7 @@ export class FileNameService {
     );
 
     if (this.settings.debugMode) {
-      console.debug('[FileNameService] AI 生成的文件名:', newFileName);
+      debugLog('[FileNameService] AI 生成的文件名:', newFileName);
     }
 
     // 验证和清理文件名
@@ -97,7 +98,7 @@ export class FileNameService {
     // 检查文件名是否实际改变（不区分大小写比较，适配 Windows）
     if (sanitizedFileName.toLowerCase() === sanitizedCurrentFileName.toLowerCase()) {
       if (this.settings.debugMode) {
-        console.debug('[FileNameService] 生成的文件名与当前文件名相同，跳过重命名');
+        debugLog('[FileNameService] 生成的文件名与当前文件名相同，跳过重命名');
       }
       // 返回"未改变"的结果，而不抛出错误
       return {

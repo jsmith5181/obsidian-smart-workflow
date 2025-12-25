@@ -13,6 +13,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
 import * as https from 'https';
+import { debugLog, errorLog } from '../../utils/logger';
 import * as http from 'http';
 import { Notice } from 'obsidian';
 
@@ -101,13 +102,13 @@ export class BinaryManager {
   async ensureBinary(): Promise<string> {
     try {
       const platform = this.detectPlatform();
-      console.log('[BinaryManager] 检测到平台:', platform);
+      debugLog('[BinaryManager] 检测到平台:', platform);
       
       const binaryInfo = this.getBinaryInfo(platform);
-      console.log('[BinaryManager] 二进制文件信息:', binaryInfo);
+      debugLog('[BinaryManager] 二进制文件信息:', binaryInfo);
       
       if (binaryInfo.needsDownload) {
-        console.log('[BinaryManager] 二进制文件不存在，开始下载...');
+        debugLog('[BinaryManager] 二进制文件不存在，开始下载...');
         await this.downloadBinary(platform);
       } else if (!fs.existsSync(binaryInfo.path)) {
         throw new BinaryManagerError(
@@ -119,7 +120,7 @@ export class BinaryManager {
       
       await this.ensureExecutable(binaryInfo.path);
       
-      console.log('[BinaryManager] 二进制文件就绪:', binaryInfo.path);
+      debugLog('[BinaryManager] 二进制文件就绪:', binaryInfo.path);
       return binaryInfo.path;
       
     } catch (error) {
@@ -218,7 +219,7 @@ export class BinaryManager {
     const binaryUrl = this.getDownloadUrl(platform);
     const checksumUrl = `${binaryUrl}.sha256`;
     
-    console.log('[BinaryManager] 下载 URL:', binaryUrl);
+    debugLog('[BinaryManager] 下载 URL:', binaryUrl);
     
     // 显示下载通知
     const notice = new Notice('正在下载 PTY 服务器二进制文件...', 0);
@@ -228,7 +229,7 @@ export class BinaryManager {
       
       for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
         try {
-          console.log(`[BinaryManager] 下载尝试 ${attempt}/${this.maxRetries}`);
+          debugLog(`[BinaryManager] 下载尝试 ${attempt}/${this.maxRetries}`);
           
           // 下载二进制文件
           await this.downloadFile(binaryUrl, targetPath, (downloaded, total, percentage) => {
@@ -239,10 +240,10 @@ export class BinaryManager {
           });
           
           // 下载校验和文件
-          console.log('[BinaryManager] 下载校验和文件...');
+          debugLog('[BinaryManager] 下载校验和文件...');
           const checksum = await this.downloadChecksum(checksumUrl);
           
-          console.log('[BinaryManager] 验证文件完整性...');
+          debugLog('[BinaryManager] 验证文件完整性...');
           const isValid = await this.verifyChecksum(targetPath, checksum);
           
           if (!isValid) {
@@ -256,12 +257,12 @@ export class BinaryManager {
           // 下载成功
           notice.hide();
           new Notice('✅ PTY 服务器下载完成！', 3000);
-          console.log('[BinaryManager] 下载成功');
+          debugLog('[BinaryManager] 下载成功');
           return;
           
         } catch (error) {
           lastError = error instanceof Error ? error : new Error(String(error));
-          console.error(`[BinaryManager] 下载尝试 ${attempt} 失败:`, lastError);
+          errorLog(`[BinaryManager] 下载尝试 ${attempt} 失败:`, lastError);
           
           // 如果是校验失败，不重试
           if (error instanceof BinaryManagerError && error.code === BinaryErrorCode.CHECKSUM_FAILED) {
@@ -324,7 +325,7 @@ export class BinaryManager {
             reject(new Error('重定向 URL 为空'));
             return;
           }
-          console.log('[BinaryManager] 重定向到:', redirectUrl);
+          debugLog('[BinaryManager] 重定向到:', redirectUrl);
           this.downloadFile(redirectUrl, targetPath, onProgress)
             .then(resolve)
             .catch(reject);
@@ -432,14 +433,14 @@ export class BinaryManager {
       const isValid = actualChecksum.toLowerCase() === expectedChecksum.toLowerCase();
       
       if (!isValid) {
-        console.error('[BinaryManager] 校验和不匹配:');
-        console.error('  期望:', expectedChecksum);
-        console.error('  实际:', actualChecksum);
+        errorLog('[BinaryManager] 校验和不匹配:');
+        errorLog('  期望:', expectedChecksum);
+        errorLog('  实际:', actualChecksum);
       }
       
       return isValid;
     } catch (error) {
-      console.error('[BinaryManager] 校验和验证失败:', error);
+      errorLog('[BinaryManager] 校验和验证失败:', error);
       return false;
     }
   }
@@ -461,12 +462,12 @@ export class BinaryManager {
       const isExecutable = (stats.mode & 0o111) !== 0;
       
       if (!isExecutable) {
-        console.log('[BinaryManager] 添加可执行权限:', filePath);
+        debugLog('[BinaryManager] 添加可执行权限:', filePath);
         await fs.promises.chmod(filePath, 0o755);
-        console.log('[BinaryManager] 权限已设置');
+        debugLog('[BinaryManager] 权限已设置');
       }
     } catch (error) {
-      console.error('[BinaryManager] 设置可执行权限失败:', error);
+      errorLog('[BinaryManager] 设置可执行权限失败:', error);
       throw new BinaryManagerError(
         BinaryErrorCode.PERMISSION_ERROR,
         `无法设置文件权限: ${error instanceof Error ? error.message : String(error)}\n` +
@@ -542,12 +543,12 @@ export class BinaryManager {
     try {
       if (fs.existsSync(this.cacheDir)) {
         await fs.promises.rm(this.cacheDir, { recursive: true, force: true });
-        console.log('[BinaryManager] 缓存已清理');
+        debugLog('[BinaryManager] 缓存已清理');
         return true;
       }
       return true;
     } catch (error) {
-      console.error('[BinaryManager] 清理缓存失败:', error);
+      errorLog('[BinaryManager] 清理缓存失败:', error);
       return false;
     }
   }

@@ -1,4 +1,5 @@
 import { App, TFile, TFolder } from 'obsidian';
+import { debugLog } from '../../utils/logger';
 
 /**
  * 文件分析器类
@@ -19,25 +20,25 @@ export class FileAnalyzer {
 
     if (!directory) {
       if (debugMode) {
-        console.debug('[FileAnalyzer] 当前文件没有父目录');
+        debugLog('[FileAnalyzer] 当前文件没有父目录');
       }
       return '';
     }
 
     if (debugMode) {
-      console.debug(`[FileAnalyzer] 正在分析目录: ${directory.path}`);
+      debugLog(`[FileAnalyzer] 正在分析目录: ${directory.path}`);
     }
 
     // 获取同目录下的其他 Markdown 文件
     const siblingFiles = this.getSiblingFiles(currentFile, directory);
 
     if (debugMode) {
-      console.debug(`[FileAnalyzer] 找到 ${siblingFiles.length} 个同目录文件`);
+      debugLog(`[FileAnalyzer] 找到 ${siblingFiles.length} 个同目录文件`);
     }
 
     if (siblingFiles.length === 0) {
       if (debugMode) {
-        console.debug('[FileAnalyzer] 目录下没有其他文件，跳过分析');
+        debugLog('[FileAnalyzer] 目录下没有其他文件，跳过分析');
       }
       return '';
     }
@@ -47,7 +48,7 @@ export class FileAnalyzer {
     const fileNames = samples.map((file: TFile) => file.basename);
 
     if (debugMode) {
-      console.debug(`[FileAnalyzer] 采样文件名:`, fileNames);
+      debugLog(`[FileAnalyzer] 采样文件名:`, fileNames);
     }
 
     // 分析命名模式
@@ -56,7 +57,7 @@ export class FileAnalyzer {
     const result = this.formatAnalysisResult(analysis, fileNames);
 
     if (debugMode) {
-      console.debug(`[FileAnalyzer] 分析结果:\n${result}`);
+      debugLog(`[FileAnalyzer] 分析结果:\n${result}`);
     }
 
     return result;

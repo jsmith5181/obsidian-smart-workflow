@@ -47,26 +47,27 @@
 /* 标签页导航栏 */
 .ai-file-namer-tabs {
     display: flex;
-    border-bottom: 2px solid var(--background-modifier-border);
-    margin-bottom: 10px;
-    padding: 0 8px;
+    border-bottom: 1px solid var(--background-modifier-border);
+    margin-bottom: 8px;
+    padding: 0 4px;
 }
 
 /* 单个标签 */
 .ai-file-namer-tab {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
+    gap: 4px;
+    padding: 4px 10px;
     cursor: pointer;
     border-bottom: 2px solid transparent;
-    margin-bottom: -2px;
+    margin-bottom: -1px;
     color: var(--text-muted);
     transition: all 0.2s ease;
     background: transparent;
     border-left: none;
     border-right: none;
     border-top: none;
+    font-size: 13px;
 }
 
 /* 标签悬停效果 */
@@ -83,13 +84,13 @@
 
 /* 标签图标 */
 .ai-file-namer-tab-icon {
-    font-size: 16px;
+    font-size: 14px;
     line-height: 1;
 }
 
 /* 内容区域 */
 .ai-file-namer-content {
-    padding: 0 8px;
+    padding: 0 4px;
     animation: fadeIn 0.2s ease;
 }
 
@@ -125,6 +126,11 @@
     height: 100% !important;
 }
 
+/* 隐藏终端视图的标题栏 */
+.workspace-leaf-content[data-type="terminal-view"] .view-header {
+    display: none !important;
+}
+
 .workspace-leaf-content[data-type="terminal-view"] .view-content {
     display: flex !important;
     flex-direction: column !important;
@@ -146,7 +152,13 @@
     overflow: hidden !important;
     padding: 0 !important;
     margin: 0 !important;
+    /* 默认背景色，当有背景图片时会被覆盖 */
     background-color: var(--background-primary);
+}
+
+/* 终端视图主容器 - 有背景图片时 */
+.terminal-view-container.has-background-image {
+    background-color: transparent !important;
 }
 
 /* 终端容器 */
@@ -160,10 +172,18 @@
     width: 100% !important;
     padding: 0 !important;
     margin: 0 !important;
+    /* 默认背景色，当有背景图片时会被覆盖 */
     background-color: var(--background-primary);
+    /* 确保容器本身不影响子元素透明度 */
+    isolation: isolate;
 }
 
-/* 终端背景图片层 */
+/* 终端容器 - 有背景图片时 */
+.terminal-container.has-background-image {
+    background-color: transparent !important;
+}
+
+/* 终端背景图片层 - 独立的背景层，透明度只影响背景 */
 .terminal-background-image {
     position: absolute;
     top: 0;
@@ -172,9 +192,10 @@
     height: 100%;
     pointer-events: none;
     z-index: 0;
+    /* 背景层的透明度通过 opacity 控制，不影响其他层 */
 }
 
-/* 终端实例容器 */
+/* 终端实例容器 - 文字层保持完全不透明 */
 .terminal-instance {
     display: flex !important;
     flex-direction: column !important;
@@ -184,6 +205,9 @@
     height: 100% !important;
     position: relative !important;
     z-index: 1;
+    /* 确保文字层不受背景透明度影响 */
+    background-color: transparent !important;
+    opacity: 1 !important;
 }
 
 /* ==================== Xterm.js 核心样式 ==================== */
@@ -199,6 +223,13 @@
     padding: 4px !important;
     cursor: text;
     outline: none;
+    /* 确保终端文字层完全不透明 */
+    opacity: 1 !important;
+}
+
+/* 有背景图片时，xterm 容器背景透明 */
+.terminal-container.has-background-image .xterm {
+    background-color: transparent !important;
 }
 
 /* Xterm 辅助元素 - 隐藏输入框 */
@@ -234,6 +265,11 @@
     height: 100%;
 }
 
+/* 有背景图片时，xterm 屏幕背景透明 */
+.terminal-container.has-background-image .xterm-screen {
+    background-color: transparent !important;
+}
+
 /* Xterm 视口（滚动容器） */
 .xterm-viewport {
     overflow-y: auto;
@@ -244,6 +280,11 @@
     left: 0;
     top: 0;
     bottom: 0;
+}
+
+/* 有背景图片时，视口背景透明 */
+.terminal-container.has-background-image .xterm-viewport {
+    background-color: transparent !important;
 }
 
 /* ==================== 光标样式 ==================== */
@@ -324,6 +365,8 @@
     font-size: 14px;
     line-height: 1.2;
     contain: strict;
+    /* 使用 CSS 变量控制文字透明度，默认完全不透明 */
+    opacity: var(--terminal-text-opacity, 1) !important;
 }
 
 /* 链接层 */
@@ -355,6 +398,14 @@
     position: absolute;
     top: 0;
     left: 0;
+    /* 使用 CSS 变量控制 Canvas 渲染器的透明度 */
+    opacity: var(--terminal-text-opacity, 1) !important;
+}
+
+/* 当有背景图片时，Canvas 渲染器也需要透明背景 */
+.terminal-container.has-background-image .xterm-canvas,
+.terminal-container.has-background-image canvas {
+    background-color: transparent !important;
 }
 
 /* ==================== 滚动条样式 ==================== */
@@ -425,6 +476,12 @@
     background-color: #1e1e1e;
 }
 
+/* 有背景图片时，主题背景色不生效 */
+.theme-dark .terminal-view-container.has-background-image,
+.theme-dark .terminal-container.has-background-image {
+    background-color: transparent !important;
+}
+
 .theme-dark .xterm-text-layer {
     color: #d4d4d4;
 }
@@ -436,6 +493,12 @@
 .theme-light .terminal-view-container,
 .theme-light .terminal-container {
     background-color: #ffffff;
+}
+
+/* 有背景图片时，主题背景色不生效 */
+.theme-light .terminal-view-container.has-background-image,
+.theme-light .terminal-container.has-background-image {
+    background-color: transparent !important;
 }
 
 .theme-light .xterm-text-layer {

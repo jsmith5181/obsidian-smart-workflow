@@ -1,5 +1,6 @@
 import { App, requestUrl, RequestUrlResponse } from 'obsidian';
 import { AIFileNamerSettings, APIConfig, BASE_PROMPT_TEMPLATE } from '../../settings/settings';
+import { debugLog } from '../../utils/logger';
 
 /**
  * API 响应数据接口
@@ -70,10 +71,10 @@ export class AIService {
     const prompt = this.renderPrompt(template, variables);
 
     if (this.settings.debugMode) {
-      console.debug('[AIService] 发送给 AI 的 Prompt:');
-      console.debug('='.repeat(50));
-      console.debug(prompt);
-      console.debug('='.repeat(50));
+      debugLog('[AIService] 发送给 AI 的 Prompt:');
+      debugLog('='.repeat(50));
+      debugLog(prompt);
+      debugLog('='.repeat(50));
     }
 
     // 构建请求体

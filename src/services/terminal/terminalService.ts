@@ -13,6 +13,7 @@ import { spawn, ChildProcess } from 'child_process';
 import { BinaryManager, BinaryManagerError, BinaryErrorCode } from './binaryManager';
 import { TerminalSettings } from '../../settings/settings';
 import { TerminalInstance } from './terminalInstance';
+import { debugLog, debugWarn, errorLog } from '../../utils/logger';
 
 /**
  * 服务器信息
@@ -92,10 +93,10 @@ export class TerminalService {
    */
   private async startPtyServer(): Promise<number> {
     try {
-      console.log('[TerminalService] 启动 PTY 服务器...');
+      debugLog('[TerminalService] 启动 PTY 服务器...');
       
       const binaryPath = await this.binaryManager.ensureBinary();
-      console.log('[TerminalService] 二进制文件路径:', binaryPath);
+      debugLog('[TerminalService] 二进制文件路径:', binaryPath);
       
       // 使用端口 0 让系统自动分配可用端口
       this.ptyServerProcess = spawn(binaryPath, ['--port', '0'], {
@@ -105,11 +106,11 @@ export class TerminalService {
         detached: false    // 不分离进程，确保随插件一起退出
       });
       
-      console.log('[TerminalService] PTY 服务器进程已启动, PID:', this.ptyServerProcess.pid);
+      debugLog('[TerminalService] PTY 服务器进程已启动, PID:', this.ptyServerProcess.pid);
       
       // 监听进程错误事件
       this.ptyServerProcess.on('error', (error) => {
-        console.error('[TerminalService] PTY 服务器进程错误:', error);
+        errorLog('[TerminalService] PTY 服务器进程错误:', error);
         this.handleServerError(error);
       });
       
@@ -117,7 +118,7 @@ export class TerminalService {
       this.ptyServerPort = port;
       this.serverRestartAttempts = 0; // 重置重启计数
       
-      console.log(`[TerminalService] PTY 服务器已启动，端口: ${port}`);
+      debugLog(`[TerminalService] PTY 服务器已启动，端口: ${port}`);
       
       this.setupServerExitHandler();
       
@@ -130,7 +131,7 @@ export class TerminalService {
         this.handleBinaryManagerError(error);
       } else {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        console.error('[TerminalService] 启动 PTY 服务器失败:', errorMessage);
+        errorLog('[TerminalService] 启动 PTY 服务器失败:', errorMessage);
         
         new Notice(
           '❌ PTY 服务器启动失败\n\n' +
@@ -163,7 +164,7 @@ export class TerminalService {
         this.ptyServerProcess?.stdout?.off('data', onData);
         
         const errorMsg = '等待 PTY 服务器端口信息超时 (10秒)';
-        console.error('[TerminalService]', errorMsg);
+        errorLog('[TerminalService]', errorMsg);
         reject(new Error(errorMsg));
       }, 10000);
 
@@ -180,13 +181,13 @@ export class TerminalService {
               if (this.ptyServerProcess?.stdout) {
                 this.ptyServerProcess.stdout.off('data', onData);
               }
-              console.log('[TerminalService] 解析到服务器信息:', info);
+              debugLog('[TerminalService] 解析到服务器信息:', info);
               resolve(info.port);
             }
           }
         } catch (e) {
           // JSON 解析失败，继续等待更多数据
-          console.debug('[TerminalService] JSON 解析失败，继续等待:', e);
+          debugLog('[TerminalService] JSON 解析失败，继续等待:', e);
         }
       };
 
@@ -215,7 +216,7 @@ export class TerminalService {
     }
 
     this.ptyServerProcess.on('exit', (code, signal) => {
-      console.error(`[TerminalService] PTY 服务器退出: code=${code}, signal=${signal}`);
+      errorLog(`[TerminalService] PTY 服务器退出: code=${code}, signal=${signal}`);
       
       // 清理状态
       this.ptyServerPort = null;
@@ -238,7 +239,7 @@ export class TerminalService {
 
       if (this.serverRestartAttempts < this.maxRestartAttempts) {
         this.serverRestartAttempts++;
-        console.log(
+        debugLog(
           `[TerminalService] 尝试重启服务器 ` +
           `(${this.serverRestartAttempts}/${this.maxRestartAttempts})`
         );
@@ -252,7 +253,7 @@ export class TerminalService {
               new Notice('✅ PTY 服务器已成功重启', 3000);
             })
             .catch(err => {
-              console.error('[TerminalService] 服务器重启失败:', err);
+              errorLog('[TerminalService] 服务器重启失败:', err);
               new Notice(
                 '❌ PTY 服务器重启失败\n' +
                 '请重新加载插件或查看控制台获取详细信息',
@@ -278,7 +279,7 @@ export class TerminalService {
    */
   async stopPtyServer(): Promise<void> {
     if (this.ptyServerProcess) {
-      console.log('[TerminalService] 停止 PTY 服务器');
+      debugLog('[TerminalService] 停止 PTY 服务器');
       
       try {
         // 发送 SIGTERM 信号优雅关闭
@@ -289,7 +290,7 @@ export class TerminalService {
           const timeout = setTimeout(() => {
             // 如果 1 秒后还没退出，强制终止
             if (this.ptyServerProcess && !this.ptyServerProcess.killed) {
-              console.warn('[TerminalService] 强制终止 PTY 服务器');
+              debugWarn('[TerminalService] 强制终止 PTY 服务器');
               this.ptyServerProcess.kill('SIGKILL');
             }
             resolve();
@@ -303,7 +304,7 @@ export class TerminalService {
           }
         });
       } catch (error) {
-        console.error('[TerminalService] 停止 PTY 服务器时出错:', error);
+        errorLog('[TerminalService] 停止 PTY 服务器时出错:', error);
       } finally {
         this.ptyServerProcess = null;
         this.ptyServerPort = null;
@@ -322,7 +323,7 @@ export class TerminalService {
     try {
       const port = await this.ensurePtyServer();
       
-      console.log(`[TerminalService] 创建终端，使用服务器端口: ${port}`);
+      debugLog(`[TerminalService] 创建终端，使用服务器端口: ${port}`);
 
       // 导入 TerminalInstance
       const { TerminalInstance } = await import('./terminalInstance');
@@ -332,7 +333,7 @@ export class TerminalService {
       if (this.settings.autoEnterVaultDirectory) {
         cwd = this.getVaultPath();
         if (cwd) {
-          console.log(`[TerminalService] 自动进入项目目录: ${cwd}`);
+          debugLog(`[TerminalService] 自动进入项目目录: ${cwd}`);
         }
       }
       
@@ -365,6 +366,7 @@ export class TerminalService {
         backgroundImagePosition: this.settings.backgroundImagePosition,
         enableBlur: this.settings.enableBlur,
         blurAmount: this.settings.blurAmount,
+        textOpacity: this.settings.textOpacity,
       });
       
       // 初始化终端（建立 WebSocket 连接）
@@ -375,7 +377,7 @@ export class TerminalService {
       return terminal;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error('[TerminalService] 创建终端实例失败:', errorMessage);
+      errorLog('[TerminalService] 创建终端实例失败:', errorMessage);
       
       new Notice(
         '❌ 无法创建终端\n\n' +
@@ -399,7 +401,7 @@ export class TerminalService {
         return adapter.getBasePath();
       }
     } catch (error) {
-      console.warn('[TerminalService] 无法获取 Vault 路径:', error);
+      debugWarn('[TerminalService] 无法获取 Vault 路径:', error);
     }
     return undefined;
   }
@@ -434,7 +436,7 @@ export class TerminalService {
       try {
         await terminal.destroy();
       } catch (error) {
-        console.error(`[TerminalService] 销毁终端 ${id} 失败:`, error);
+        errorLog(`[TerminalService] 销毁终端 ${id} 失败:`, error);
       } finally {
         this.terminals.delete(id);
       }
@@ -450,7 +452,7 @@ export class TerminalService {
     
     for (const [id, terminal] of this.terminals.entries()) {
       const destroyPromise = terminal.destroy().catch(error => {
-        console.error(`[TerminalService] 销毁终端 ${id} 失败:`, error);
+        errorLog(`[TerminalService] 销毁终端 ${id} 失败:`, error);
         failedTerminals.push(id);
       });
       destroyPromises.push(destroyPromise);
@@ -464,7 +466,7 @@ export class TerminalService {
     
     // 如果有失败的终端，记录警告
     if (failedTerminals.length > 0) {
-      console.warn(`[TerminalService] 以下终端清理失败: ${failedTerminals.join(', ')}`);
+      debugWarn(`[TerminalService] 以下终端清理失败: ${failedTerminals.join(', ')}`);
     }
   }
 
@@ -494,7 +496,7 @@ export class TerminalService {
    */
   async restoreTerminalStates(states: SavedTerminalState[]): Promise<void> {
     // TODO: 实现终端状态恢复
-    console.log('[TerminalService] 恢复终端状态:', states);
+    debugLog('[TerminalService] 恢复终端状态:', states);
   }
 
   /**
@@ -503,7 +505,7 @@ export class TerminalService {
    * @param error BinaryManager 错误
    */
   private handleBinaryManagerError(error: BinaryManagerError): void {
-    console.error('[TerminalService] BinaryManager 错误:', error);
+    errorLog('[TerminalService] BinaryManager 错误:', error);
     
     switch (error.code) {
       case BinaryErrorCode.BINARY_MISSING:

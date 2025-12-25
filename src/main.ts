@@ -6,6 +6,7 @@ import { FileNameService, RenameResult } from './services/naming/fileNameService
 import { NoticeHelper } from './ui/noticeHelper';
 import { TerminalService } from './services/terminal/terminalService';
 import { TerminalView, TERMINAL_VIEW_TYPE } from './ui/terminal/terminalView';
+import { setDebugMode, debugLog, errorLog } from './utils/logger';
 
 /**
  * AI 文件名生成器插件主类
@@ -22,10 +23,13 @@ export default class AIFileNamerPlugin extends Plugin {
    * 插件加载时调用
    */
   async onload() {
-    console.debug('加载 AI File Namer 插件');
+    debugLog('加载 AI File Namer 插件');
 
     // 加载设置
     await this.loadSettings();
+    
+    // 初始化调试模式
+    setDebugMode(this.settings.debugMode);
 
     // 初始化服务
     this.aiService = new AIService(this.app, this.settings);
@@ -36,7 +40,6 @@ export default class AIFileNamerPlugin extends Plugin {
     );
     
     // 初始化终端服务（使用 Rust PTY 服务器架构）
-    console.log('[Plugin] 使用 Rust PTY 服务器架构');
     const pluginDir = this.getPluginDir();
     this.terminalService = new TerminalService(this.app, this.settings.terminal, pluginDir);
 
@@ -137,7 +140,7 @@ export default class AIFileNamerPlugin extends Plugin {
         // 如果恢复了终端，自动打开终端面板
         await this.activateTerminalView();
       } catch (error) {
-        console.error('恢复终端状态失败:', error);
+        errorLog('恢复终端状态失败:', error);
         NoticeHelper.error('恢复终端状态失败，请手动创建新终端');
       }
     }
@@ -145,9 +148,9 @@ export default class AIFileNamerPlugin extends Plugin {
     // 启动 PTY 服务器
     try {
       await this.terminalService.ensurePtyServer();
-      console.log('[Plugin] PTY 服务器已启动');
+      debugLog('[Plugin] PTY 服务器已启动');
     } catch (error) {
-      console.error('[Plugin] 启动 PTY 服务器失败:', error);
+      errorLog('[Plugin] 启动 PTY 服务器失败:', error);
       NoticeHelper.error(
         '❌ PTY 服务器启动失败\n' +
         '请查看控制台获取详细错误信息'
@@ -235,10 +238,10 @@ export default class AIFileNamerPlugin extends Plugin {
     } catch (error) {
       if (error instanceof Error) {
         NoticeHelper.error(`操作失败: ${error.message}`);
-        console.error('AI 文件名生成错误:', error);
+        errorLog('AI 文件名生成错误:', error);
       } else {
         NoticeHelper.error('操作失败: 未知错误');
-        console.error('AI 文件名生成错误:', error);
+        errorLog('AI 文件名生成错误:', error);
       }
     } finally {
       // 移除生成状态
@@ -310,6 +313,10 @@ export default class AIFileNamerPlugin extends Plugin {
    */
   async saveSettings() {
     await this.saveData(this.settings);
+    
+    // 更新调试模式
+    setDebugMode(this.settings.debugMode);
+    
     // 更新终端服务的设置（如果已初始化）
     if (this.terminalService) {
       this.terminalService.updateSettings(this.settings.terminal);
@@ -320,7 +327,7 @@ export default class AIFileNamerPlugin extends Plugin {
    * 插件卸载时调用
    */
   async onunload() {
-    console.debug('卸载 AI File Namer 插件');
+    debugLog('卸载 AI File Namer 插件');
 
     // 保存终端状态（如果启用）
     if (this.settings.terminal.restoreTerminalsOnLoad) {
@@ -329,7 +336,7 @@ export default class AIFileNamerPlugin extends Plugin {
           this.terminalService.saveTerminalStates();
         await this.saveSettings();
       } catch (error) {
-        console.error('保存终端状态失败:', error);
+        errorLog('保存终端状态失败:', error);
       }
     }
 
@@ -337,15 +344,15 @@ export default class AIFileNamerPlugin extends Plugin {
     try {
       await this.terminalService.destroyAllTerminals();
     } catch (error) {
-      console.error('清理终端失败:', error);
+      errorLog('清理终端失败:', error);
     }
 
     // 停止 PTY 服务器
     try {
       await this.terminalService.stopPtyServer();
-      console.log('[Plugin] PTY 服务器已停止');
+      debugLog('[Plugin] PTY 服务器已停止');
     } catch (error) {
-      console.error('[Plugin] 停止 PTY 服务器失败:', error);
+      errorLog('[Plugin] 停止 PTY 服务器失败:', error);
     }
   }
 

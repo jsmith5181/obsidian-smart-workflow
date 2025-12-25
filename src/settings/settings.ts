@@ -65,13 +65,16 @@ export interface TerminalSettings {
 
   // 背景图片设置
   backgroundImage?: string;        // 背景图片 URL
-  backgroundImageOpacity?: number; // 背景图片透明度 (0-0.8)
+  backgroundImageOpacity?: number; // 背景图片透明度 (0-1.0)
   backgroundImageSize?: 'cover' | 'contain' | 'auto'; // 背景图片大小
   backgroundImagePosition?: string; // 背景图片位置
   
   // 毛玻璃效果
   enableBlur?: boolean;            // 是否启用毛玻璃效果
   blurAmount?: number;             // 毛玻璃模糊程度 (0-20px)
+
+  // 文本透明度
+  textOpacity?: number;            // 文本透明度 (0-1.0)
 
   // 渲染器类型：Canvas（推荐）、WebGL（高性能）
   // 注意：DOM 渲染器已过时，存在光标定位等问题，不再提供
@@ -190,11 +193,12 @@ export const DEFAULT_TERMINAL_SETTINGS: TerminalSettings = {
   defaultHeight: 300,
   restoreTerminalsOnLoad: false,
   savedTerminals: [],
-  backgroundImageOpacity: 0.3,
+  backgroundImageOpacity: 0.5,
   backgroundImageSize: 'cover',
   backgroundImagePosition: 'center',
   enableBlur: false,
-  blurAmount: 10
+  blurAmount: 10,
+  textOpacity: 1.0
 };
 
 /**

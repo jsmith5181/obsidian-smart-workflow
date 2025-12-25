@@ -15,6 +15,7 @@ import { WebLinksAddon } from '@xterm/addon-web-links';
 import { CanvasAddon } from '@xterm/addon-canvas';
 import { WebglAddon } from '@xterm/addon-webgl';
 import { platform } from 'os';
+import { debugLog, debugWarn, errorLog } from '../../utils/logger';
 
 // 导入 xterm.js 的 CSS
 import '@xterm/xterm/css/xterm.css';
@@ -42,6 +43,7 @@ export interface TerminalOptions {
   backgroundImagePosition?: string;
   enableBlur?: boolean;
   blurAmount?: number;
+  textOpacity?: number;
 }
 
 /**
@@ -117,6 +119,12 @@ export class TerminalInstance {
       windowsMode: platform() === 'win32',
     });
 
+    debugLog('[Terminal] xterm 配置:', {
+      allowTransparency: !!options.backgroundImage,
+      backgroundImage: options.backgroundImage,
+      theme: this.getTheme()
+    });
+
     // 初始化 FitAddon
     this.fitAddon = new FitAddon();
     this.xterm.loadAddon(this.fitAddon);
@@ -128,7 +136,7 @@ export class TerminalInstance {
     // 渲染器将在 xterm.open() 之后根据配置加载
     this.options.preferredRenderer = options.preferredRenderer ?? 'canvas';
     
-    console.log('[Terminal] 终端实例已创建，渲染器类型:', this.options.preferredRenderer);
+    debugLog('[Terminal] 终端实例已创建，渲染器类型:', this.options.preferredRenderer);
   }
 
   /**
@@ -196,23 +204,23 @@ export class TerminalInstance {
       if (renderer === 'canvas') {
         this.renderer = new CanvasAddon();
         this.xterm.loadAddon(this.renderer);
-        console.log('[Terminal] Canvas 渲染器已加载');
+        debugLog('[Terminal] Canvas 渲染器已加载');
       } else if (renderer === 'webgl') {
         const webglAddon = new WebglAddon();
         
         // 监听 WebGL 上下文丢失
         webglAddon.onContextLoss(() => {
-          console.error('[Terminal] WebGL 上下文丢失');
+          errorLog('[Terminal] WebGL 上下文丢失');
           throw new Error('WebGL 上下文丢失，终端渲染失败');
         });
         
         this.xterm.loadAddon(webglAddon);
         this.renderer = webglAddon;
-        console.log('[Terminal] WebGL 渲染器已加载');
+        debugLog('[Terminal] WebGL 渲染器已加载');
       }
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
-      console.error(`[Terminal] ${renderer.toUpperCase()} 渲染器加载失败:`, error);
+      errorLog(`[Terminal] ${renderer.toUpperCase()} 渲染器加载失败:`, error);
       throw new Error(`${renderer.toUpperCase()} 渲染器加载失败: ${errorMsg}`);
     }
   }
@@ -227,7 +235,7 @@ export class TerminalInstance {
         const ctx = canvas.getContext('2d');
         return !!ctx;
       } catch (error) {
-        console.warn('[Terminal] Canvas 2D 检测失败:', error);
+        debugWarn('[Terminal] Canvas 2D 检测失败:', error);
         return false;
       }
     }
@@ -238,7 +246,7 @@ export class TerminalInstance {
         const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
         return !!gl;
       } catch (error) {
-        console.warn('[Terminal] WebGL 检测失败:', error);
+        debugWarn('[Terminal] WebGL 检测失败:', error);
         return false;
       }
     }
@@ -269,10 +277,10 @@ export class TerminalInstance {
       this.setupXtermHandlers();
 
       this.isInitialized = true;
-      console.log('[Terminal] 终端实例初始化成功');
+      debugLog('[Terminal] 终端实例初始化成功');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error('[Terminal] 初始化失败:', error);
+      errorLog('[Terminal] 初始化失败:', error);
       this.xterm.write(`\r\n\x1b[1;31m[错误] 无法启动终端\x1b[0m\r\n`);
       this.xterm.write(`\x1b[31m${errorMessage}\x1b[0m\r\n`);
       throw new Error(`终端启动失败: ${errorMessage}`);
@@ -290,7 +298,7 @@ export class TerminalInstance {
       }
 
       const wsUrl = `ws://127.0.0.1:${this.serverPort}`;
-      console.log('[Terminal] 正在连接到 PTY 服务器:', wsUrl);
+      debugLog('[Terminal] 正在连接到 PTY 服务器:', wsUrl);
 
       // 设置连接超时（10秒）
       this.connectionTimeout = setTimeout(() => {
@@ -306,7 +314,7 @@ export class TerminalInstance {
         this.ws = new WebSocket(wsUrl);
 
         this.ws.onopen = () => {
-          console.log('[Terminal] WebSocket 连接成功');
+          debugLog('[Terminal] WebSocket 连接成功');
           
           // 清除连接超时
           if (this.connectionTimeout) {
@@ -324,14 +332,14 @@ export class TerminalInstance {
             cwd: this.options.cwd,
             env: this.options.env
           };
-          console.log('[Terminal] 发送初始化消息:', initMsg);
+          debugLog('[Terminal] 发送初始化消息:', initMsg);
           this.sendMessage(initMsg);
 
           resolve();
         };
 
         this.ws.onerror = (error) => {
-          console.error('[Terminal] WebSocket 错误:', error);
+          errorLog('[Terminal] WebSocket 错误:', error);
           
           // 清除连接超时
           if (this.connectionTimeout) {
@@ -365,7 +373,7 @@ export class TerminalInstance {
         };
 
         this.ws.onclose = (event) => {
-          console.log('[Terminal] WebSocket 连接关闭:', event.code, event.reason);
+          debugLog('[Terminal] WebSocket 连接关闭:', event.code, event.reason);
           
           // 清除连接超时
           if (this.connectionTimeout) {
@@ -383,7 +391,7 @@ export class TerminalInstance {
           this.connectionTimeout = null;
         }
 
-        console.error('[Terminal] 创建 WebSocket 失败:', error);
+        errorLog('[Terminal] 创建 WebSocket 失败:', error);
         reject(error);
       }
     });
@@ -395,13 +403,13 @@ export class TerminalInstance {
   private setupXtermHandlers(): void {
     // 用户输入 -> WebSocket
     this.xterm.onData((data) => {
-      console.log('[Terminal] xterm.onData 触发，数据长度:', data.length, '内容:', data.substring(0, 20));
+      debugLog('[Terminal] xterm.onData 触发，数据长度:', data.length, '内容:', data.substring(0, 20));
       this.sendMessage(data);
     });
 
     // 处理二进制输入（粘贴等）
     this.xterm.onBinary((data) => {
-      console.log('[Terminal] xterm.onBinary 触发，数据长度:', data.length);
+      debugLog('[Terminal] xterm.onBinary 触发，数据长度:', data.length);
       // 将 base64 编码的二进制数据转换为 Uint8Array
       const binaryData = Uint8Array.from(atob(data), c => c.charCodeAt(0));
       this.sendMessage(binaryData);
@@ -414,24 +422,24 @@ export class TerminalInstance {
    */
   private sendMessage(message: WSInputMessage): void {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-      console.warn('[Terminal] WebSocket 未连接，无法发送消息，状态:', this.ws?.readyState);
+      debugWarn('[Terminal] WebSocket 未连接，无法发送消息，状态:', this.ws?.readyState);
       return;
     }
 
     try {
       if (typeof message === 'string') {
-        console.log('[Terminal] 发送文本消息，长度:', message.length);
+        debugLog('[Terminal] 发送文本消息，长度:', message.length);
         this.ws.send(message);
       } else if (message instanceof Uint8Array) {
-        console.log('[Terminal] 发送二进制消息，长度:', message.length);
+        debugLog('[Terminal] 发送二进制消息，长度:', message.length);
         this.ws.send(message);
       } else {
         // JSON 消息（resize, env 等）
-        console.log('[Terminal] 发送 JSON 消息:', message.type);
+        debugLog('[Terminal] 发送 JSON 消息:', message.type);
         this.ws.send(JSON.stringify(message));
       }
     } catch (error) {
-      console.error('[Terminal] 发送消息失败:', error);
+      errorLog('[Terminal] 发送消息失败:', error);
     }
   }
 
@@ -440,7 +448,7 @@ export class TerminalInstance {
    */
   fit(): void {
     if (!this.containerEl) {
-      console.warn('[Terminal] 无法调整大小：容器不存在');
+      debugWarn('[Terminal] 无法调整大小：容器不存在');
       return;
     }
 
@@ -449,19 +457,19 @@ export class TerminalInstance {
       const containerWidth = this.containerEl.clientWidth;
       const containerHeight = this.containerEl.clientHeight;
       
-      console.log('[Terminal] fit() 调用，容器尺寸:', {
+      debugLog('[Terminal] fit() 调用，容器尺寸:', {
         width: containerWidth,
         height: containerHeight
       });
 
       if (containerWidth === 0 || containerHeight === 0) {
-        console.warn('[Terminal] 容器尺寸为 0，跳过 fit');
+        debugWarn('[Terminal] 容器尺寸为 0，跳过 fit');
         return;
       }
 
       this.fitAddon.fit();
 
-      console.log('[Terminal] fit() 完成，终端尺寸:', {
+      debugLog('[Terminal] fit() 完成，终端尺寸:', {
         cols: this.xterm.cols,
         rows: this.xterm.rows
       });
@@ -474,9 +482,9 @@ export class TerminalInstance {
       };
 
       this.sendMessage(resizeMsg);
-      console.log(`[Terminal] 已发送 resize 消息: ${this.xterm.cols}x${this.xterm.rows}`);
+      debugLog(`[Terminal] 已发送 resize 消息: ${this.xterm.cols}x${this.xterm.rows}`);
     } catch (error) {
-      console.warn('[Terminal] 调整大小失败:', error);
+      debugWarn('[Terminal] 调整大小失败:', error);
     }
   }
 
@@ -508,7 +516,7 @@ export class TerminalInstance {
 
       this.reconnectTimeout = setTimeout(() => {
         this.connectToServer().catch(err => {
-          console.error('[Terminal] 重连失败:', err);
+          errorLog('[Terminal] 重连失败:', err);
           this.xterm.write('\x1b[31m重连失败\x1b[0m\r\n');
         });
       }, delay);
@@ -570,7 +578,7 @@ export class TerminalInstance {
       try {
         this.renderer.dispose();
       } catch (error) {
-        console.debug('[Terminal] 渲染器清理:', error);
+        debugLog('[Terminal] 渲染器清理:', error);
       }
       this.renderer = null;
     }
@@ -582,7 +590,7 @@ export class TerminalInstance {
           this.ws.close(1000, 'Terminal destroyed');
         }
       } catch (error) {
-        console.error('[Terminal] 关闭 WebSocket 失败:', error);
+        errorLog('[Terminal] 关闭 WebSocket 失败:', error);
       } finally {
         this.ws = null;
       }
@@ -593,11 +601,11 @@ export class TerminalInstance {
       try {
         this.xterm.dispose();
       } catch (error) {
-        console.debug('[Terminal] xterm 清理:', error);
+        debugLog('[Terminal] xterm 清理:', error);
       }
     }
 
-    console.log('[Terminal] 终端实例已销毁');
+    debugLog('[Terminal] 终端实例已销毁');
   }
 
   /**
@@ -609,7 +617,7 @@ export class TerminalInstance {
     }
 
     if (this.containerEl === container) {
-      console.log('[Terminal] 容器已附加，跳过');
+      debugLog('[Terminal] 容器已附加，跳过');
       return;
     }
 
@@ -617,7 +625,7 @@ export class TerminalInstance {
     this.containerEl = container;
     
     // 确保容器有明确的尺寸
-    console.log('[Terminal] 附加前容器尺寸:', {
+    debugLog('[Terminal] 附加前容器尺寸:', {
       clientWidth: container.clientWidth,
       clientHeight: container.clientHeight,
       offsetWidth: container.offsetWidth,
@@ -635,22 +643,22 @@ export class TerminalInstance {
     // 先附加到 DOM
     try {
       this.xterm.open(container);
-      console.log('[Terminal] xterm.open() 成功');
+      debugLog('[Terminal] xterm.open() 成功');
     } catch (error) {
-      console.error('[Terminal] xterm.open() 失败:', error);
+      errorLog('[Terminal] xterm.open() 失败:', error);
       throw error;
     }
 
-    console.log('[Terminal] 已附加到 DOM，xterm 尺寸:', {
+    debugLog('[Terminal] 已附加到 DOM，xterm 尺寸:', {
       cols: this.xterm.cols,
       rows: this.xterm.rows
     });
 
     // 检查 xterm 是否真的附加了
     const xtermElement = container.querySelector('.xterm');
-    console.log('[Terminal] .xterm 元素存在:', !!xtermElement);
+    debugLog('[Terminal] .xterm 元素存在:', !!xtermElement);
     if (xtermElement) {
-      console.log('[Terminal] .xterm 元素尺寸:', {
+      debugLog('[Terminal] .xterm 元素尺寸:', {
         clientWidth: xtermElement.clientWidth,
         clientHeight: xtermElement.clientHeight
       });
@@ -663,15 +671,15 @@ export class TerminalInstance {
     // 延迟加载渲染器，确保 DOM 完全准备好
     setTimeout(() => {
       try {
-        console.log('[Terminal] 开始加载渲染器:', preferredRenderer);
+        debugLog('[Terminal] 开始加载渲染器:', preferredRenderer);
         this.loadRenderer(preferredRenderer);
         
         // 加载后立即调整大小
-        console.log('[Terminal] 渲染器加载完成，调用 fit()');
+        debugLog('[Terminal] 渲染器加载完成，调用 fit()');
         this.fit();
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : String(error);
-        console.error('[Terminal] 渲染器加载失败:', error);
+        errorLog('[Terminal] 渲染器加载失败:', error);
         
         // 在终端中显示错误
         this.xterm.write(`\r\n\x1b[1;31m[渲染器错误]\x1b[0m\r\n`);
@@ -778,5 +786,18 @@ export class TerminalInstance {
     }
     
     return 'canvas';
+  }
+
+  /**
+   * 更新终端主题（用于动态更新背景等设置）
+   */
+  updateTheme(): void {
+    const newTheme = this.getTheme();
+    debugLog('[Terminal] 更新主题:', newTheme);
+    this.xterm.options.theme = newTheme;
+    this.xterm.options.allowTransparency = !!this.options.backgroundImage;
+    
+    // 强制刷新终端显示
+    this.xterm.refresh(0, this.xterm.rows - 1);
   }
 }

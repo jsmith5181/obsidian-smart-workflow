@@ -885,110 +885,125 @@ export class AIFileNamerSettingTab extends PluginSettingTab {
             new Notice('前景色已重置为默认值');
           }));
 
-      // 背景图片
-      const bgImageSetting = new Setting(themeCard)
-        .setName('背景图片')
-        .setDesc('终端背景图片的 URL（支持本地路径或网络地址）');
-      
-      bgImageSetting.addText(text => {
-        const inputEl = text
-          .setPlaceholder('https://example.com/image.jpg')
-          .setValue(this.plugin.settings.terminal.backgroundImage || '')
-          .onChange(async (value) => {
-            // 只保存，不刷新
-            this.plugin.settings.terminal.backgroundImage = value || undefined;
-            await this.plugin.saveSettings();
-          });
+      // 背景图片设置（仅 Canvas 渲染器支持）
+      if (this.plugin.settings.terminal.preferredRenderer === 'canvas') {
+        const bgImageSetting = new Setting(themeCard)
+          .setName('背景图片')
+          .setDesc('终端背景图片的 URL（仅 Canvas 渲染器支持）');
         
-        // 失去焦点时刷新界面
-        text.inputEl.addEventListener('blur', () => {
-          this.display();
+        bgImageSetting.addText(text => {
+          const inputEl = text
+            .setPlaceholder('https://example.com/image.jpg')
+            .setValue(this.plugin.settings.terminal.backgroundImage || '')
+            .onChange(async (value) => {
+              // 只保存，不刷新
+              this.plugin.settings.terminal.backgroundImage = value || undefined;
+              await this.plugin.saveSettings();
+            });
+          
+          // 失去焦点时刷新界面
+          text.inputEl.addEventListener('blur', () => {
+            this.display();
+          });
+          
+          return inputEl;
         });
         
-        return inputEl;
-      });
-      
-      bgImageSetting.addExtraButton(button => button
-        .setIcon('reset')
-        .setTooltip('清除背景图片')
-        .onClick(async () => {
-          this.plugin.settings.terminal.backgroundImage = undefined;
-          await this.plugin.saveSettings();
-          this.display();
-          new Notice('背景图片已清除');
-        }));
+        bgImageSetting.addExtraButton(button => button
+          .setIcon('reset')
+          .setTooltip('清除背景图片')
+          .onClick(async () => {
+            this.plugin.settings.terminal.backgroundImage = undefined;
+            await this.plugin.saveSettings();
+            this.display();
+            new Notice('背景图片已清除');
+          }));
 
-      // 背景图片透明度
-      if (this.plugin.settings.terminal.backgroundImage) {
-        new Setting(themeCard)
-          .setName('背景图片透明度')
-          .setDesc('调整背景图片的透明度（0.00-0.80，过高会遮挡文字）')
-          .addSlider(slider => slider
-            .setLimits(0, 0.8, 0.05)
-            .setValue(this.plugin.settings.terminal.backgroundImageOpacity ?? 0.3)
-            .setDynamicTooltip()
-            .onChange(async (value) => {
-              this.plugin.settings.terminal.backgroundImageOpacity = value;
-              await this.plugin.saveSettings();
-            }));
-
-        // 背景图片大小
-        new Setting(themeCard)
-          .setName('背景图片大小')
-          .setDesc('设置背景图片的显示方式')
-          .addDropdown(dropdown => dropdown
-            .addOption('cover', '覆盖（Cover）')
-            .addOption('contain', '包含（Contain）')
-            .addOption('auto', '原始大小（Auto）')
-            .setValue(this.plugin.settings.terminal.backgroundImageSize || 'cover')
-            .onChange(async (value: 'cover' | 'contain' | 'auto') => {
-              this.plugin.settings.terminal.backgroundImageSize = value;
-              await this.plugin.saveSettings();
-            }));
-
-        // 背景图片位置
-        new Setting(themeCard)
-          .setName('背景图片位置')
-          .setDesc('设置背景图片的对齐位置')
-          .addDropdown(dropdown => dropdown
-            .addOption('center', '居中')
-            .addOption('top', '顶部')
-            .addOption('bottom', '底部')
-            .addOption('left', '左侧')
-            .addOption('right', '右侧')
-            .addOption('top left', '左上')
-            .addOption('top right', '右上')
-            .addOption('bottom left', '左下')
-            .addOption('bottom right', '右下')
-            .setValue(this.plugin.settings.terminal.backgroundImagePosition || 'center')
-            .onChange(async (value) => {
-              this.plugin.settings.terminal.backgroundImagePosition = value;
-              await this.plugin.saveSettings();
-            }));
-
-        // 毛玻璃效果
-        new Setting(themeCard)
-          .setName('毛玻璃效果')
-          .setDesc('为终端背景添加模糊效果')
-          .addToggle(toggle => toggle
-            .setValue(this.plugin.settings.terminal.enableBlur ?? false)
-            .onChange(async (value) => {
-              this.plugin.settings.terminal.enableBlur = value;
-              await this.plugin.saveSettings();
-              this.display(); // 刷新以显示/隐藏模糊程度滑块
-            }));
-
-        // 毛玻璃模糊程度
-        if (this.plugin.settings.terminal.enableBlur) {
+        // 背景图片透明度
+        if (this.plugin.settings.terminal.backgroundImage) {
           new Setting(themeCard)
-            .setName('模糊程度')
-            .setDesc('调整毛玻璃的模糊强度（0-20px）')
+            .setName('背景图片透明度')
+            .setDesc('调整背景图片的可见度（0.00 = 很暗，1.00 = 完全清晰）')
             .addSlider(slider => slider
-              .setLimits(0, 20, 1)
-              .setValue(this.plugin.settings.terminal.blurAmount ?? 10)
+              .setLimits(0, 1, 0.05)
+              .setValue(this.plugin.settings.terminal.backgroundImageOpacity ?? 0.5)
               .setDynamicTooltip()
               .onChange(async (value) => {
-                this.plugin.settings.terminal.blurAmount = value;
+                this.plugin.settings.terminal.backgroundImageOpacity = value;
+                await this.plugin.saveSettings();
+              }));
+
+          // 背景图片大小
+          new Setting(themeCard)
+            .setName('背景图片大小')
+            .setDesc('设置背景图片的显示方式')
+            .addDropdown(dropdown => dropdown
+              .addOption('cover', '覆盖（Cover）')
+              .addOption('contain', '包含（Contain）')
+              .addOption('auto', '原始大小（Auto）')
+              .setValue(this.plugin.settings.terminal.backgroundImageSize || 'cover')
+              .onChange(async (value: 'cover' | 'contain' | 'auto') => {
+                this.plugin.settings.terminal.backgroundImageSize = value;
+                await this.plugin.saveSettings();
+              }));
+
+          // 背景图片位置
+          new Setting(themeCard)
+            .setName('背景图片位置')
+            .setDesc('设置背景图片的对齐位置')
+            .addDropdown(dropdown => dropdown
+              .addOption('center', '居中')
+              .addOption('top', '顶部')
+              .addOption('bottom', '底部')
+              .addOption('left', '左侧')
+              .addOption('right', '右侧')
+              .addOption('top left', '左上')
+              .addOption('top right', '右上')
+              .addOption('bottom left', '左下')
+              .addOption('bottom right', '右下')
+              .setValue(this.plugin.settings.terminal.backgroundImagePosition || 'center')
+              .onChange(async (value) => {
+                this.plugin.settings.terminal.backgroundImagePosition = value;
+                await this.plugin.saveSettings();
+              }));
+
+          // 毛玻璃效果
+          new Setting(themeCard)
+            .setName('毛玻璃效果')
+            .setDesc('为终端背景添加模糊效果')
+            .addToggle(toggle => toggle
+              .setValue(this.plugin.settings.terminal.enableBlur ?? false)
+              .onChange(async (value) => {
+                this.plugin.settings.terminal.enableBlur = value;
+                await this.plugin.saveSettings();
+                this.display(); // 刷新以显示/隐藏模糊程度滑块
+              }));
+
+          // 毛玻璃模糊程度
+          if (this.plugin.settings.terminal.enableBlur) {
+            new Setting(themeCard)
+              .setName('模糊程度')
+              .setDesc('调整毛玻璃的模糊强度（0-20px）')
+              .addSlider(slider => slider
+                .setLimits(0, 20, 1)
+                .setValue(this.plugin.settings.terminal.blurAmount ?? 10)
+                .setDynamicTooltip()
+                .onChange(async (value) => {
+                  this.plugin.settings.terminal.blurAmount = value;
+                  await this.plugin.saveSettings();
+                }));
+          }
+
+          // 文本透明度
+          new Setting(themeCard)
+            .setName('文本透明度')
+            .setDesc('调整终端文本的透明度（0.00 = 完全透明，1.00 = 完全不透明）')
+            .addSlider(slider => slider
+              .setLimits(0, 1, 0.05)
+              .setValue(this.plugin.settings.terminal.textOpacity ?? 1.0)
+              .setDynamicTooltip()
+              .onChange(async (value) => {
+                this.plugin.settings.terminal.textOpacity = value;
                 await this.plugin.saveSettings();
               }));
         }
@@ -1065,6 +1080,7 @@ export class AIFileNamerSettingTab extends PluginSettingTab {
         .onChange(async (value: 'canvas' | 'webgl') => {
           this.plugin.settings.terminal.preferredRenderer = value;
           await this.plugin.saveSettings();
+          this.display(); // 刷新设置页面以显示/隐藏背景图片选项
           new Notice('渲染器设置已更新，将在下次打开终端时生效');
         }));
 
