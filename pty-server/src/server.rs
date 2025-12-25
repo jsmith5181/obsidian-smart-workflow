@@ -121,14 +121,16 @@ async fn handle_connection(
     let mut shell_type: Option<String> = None;
     let mut shell_args: Option<Vec<String>> = None;
     let mut cwd: Option<String> = None;
+    let mut env: Option<std::collections::HashMap<String, String>> = None;
     let mut first_msg_processed = false;
     
     if let Some(Ok(Message::Text(text))) = ws_receiver.next().await {
-        if let Ok(Command::Init { shell_type: st, shell_args: sa, cwd: c, .. }) = serde_json::from_str::<Command>(&text) {
+        if let Ok(Command::Init { shell_type: st, shell_args: sa, cwd: c, env: e }) = serde_json::from_str::<Command>(&text) {
             log_info!("收到初始化命令，shell_type: {:?}, shell_args: {:?}, cwd: {:?}", st, sa, c);
             shell_type = st;
             shell_args = sa;
             cwd = c;
+            env = e;
             first_msg_processed = true;
         }
     }
@@ -143,7 +145,8 @@ async fn handle_connection(
         24, 
         shell_type.as_deref(), 
         shell_args.as_ref().map(|v| v.as_slice()),
-        cwd.as_deref()
+        cwd.as_deref(),
+        env.as_ref()
     )?;
     let pty_session = Arc::new(TokioMutex::new(pty_session));
     

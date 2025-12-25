@@ -201,7 +201,11 @@ export class TerminalInstance {
             shell_type: this.shellType === 'default' ? undefined : this.shellType,
             shell_args: this.options.shellArgs,
             cwd: this.options.cwd,
-            env: this.options.env
+            env: {
+              // 确保 TERM 环境变量存在，否则 clear/vim 等命令无法正常工作
+              TERM: process.env.TERM || 'xterm-256color',
+              ...this.options.env
+            }
           };
           this.sendMessage(initMsg);
           resolve();

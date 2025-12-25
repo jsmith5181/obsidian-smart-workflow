@@ -24,12 +24,14 @@ impl PtySession {
     /// shell_type: 可选的 shell 类型 (cmd, powershell, wsl, bash, zsh, custom:/path)
     /// shell_args: 可选的 shell 启动参数
     /// cwd: 可选的工作目录
+    /// env: 可选的环境变量
     pub fn new(
         cols: u16, 
         rows: u16, 
         shell_type: Option<&str>,
         shell_args: Option<&[String]>,
-        cwd: Option<&str>
+        cwd: Option<&str>,
+        env: Option<&std::collections::HashMap<String, String>>
     ) -> Result<(Self, PtyReader, PtyWriter), Box<dyn std::error::Error>> {
         // 获取 PTY 系统
         let pty_system = native_pty_system();
@@ -55,6 +57,23 @@ impl PtySession {
         // 设置工作目录
         if let Some(cwd_path) = cwd {
             cmd.cwd(cwd_path);
+        }
+        
+        // 设置环境变量
+        // 确保 TERM 环境变量存在，否则 clear/vim 等命令无法正常工作
+        let term_value = env
+            .and_then(|e| e.get("TERM").cloned())
+            .or_else(|| std::env::var("TERM").ok())
+            .unwrap_or_else(|| "xterm-256color".to_string());
+        cmd.env("TERM", term_value);
+        
+        // 设置其他自定义环境变量
+        if let Some(env_vars) = env {
+            for (key, value) in env_vars {
+                if key != "TERM" {  // TERM 已经处理过了
+                    cmd.env(key, value);
+                }
+            }
         }
         
         // 启动 shell 进程

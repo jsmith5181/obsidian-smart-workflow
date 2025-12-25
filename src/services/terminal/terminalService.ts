@@ -92,7 +92,11 @@ export class TerminalService {
       // 使用端口 0 让系统自动分配可用端口
       this.ptyServerProcess = spawn(binaryPath, ['--port', '0'], {
         stdio: ['pipe', 'pipe', 'pipe'], // 捕获 stderr 以避免日志干扰
-        env: process.env,
+        env: { 
+          ...process.env, 
+          // 确保 TERM 环境变量存在，否则 clear/vim 等命令无法正常工作
+          TERM: process.env.TERM || 'xterm-256color' 
+        },
         windowsHide: true, // Windows: 隐藏控制台窗口
         detached: false    // 不分离进程，确保随插件一起退出
       });
