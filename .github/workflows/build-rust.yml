@@ -150,9 +150,18 @@ jobs:
           BINARY_NAME="pty-server-${{ matrix.platform }}-${{ matrix.arch }}${{ matrix.ext }}"
           chmod +x "binaries/${BINARY_NAME}" 2>/dev/null || true
           
-          # Test that binary can start and output port info
-          timeout 5s "binaries/${BINARY_NAME}" --port 0 > output.txt 2>&1 || true
+          # 使用后台进程 + sleep 实现跨平台超时
+          "binaries/${BINARY_NAME}" --port 0 > output.txt 2>&1 &
+          PID=$!
           
+          # 等待 5 秒
+          sleep 5
+          
+          # 终止进程
+          kill $PID 2>/dev/null || true
+          wait $PID 2>/dev/null || true
+          
+          # 检查输出
           if grep -q '"port"' output.txt; then
             echo "✓ Binary successfully outputs port information"
             cat output.txt
