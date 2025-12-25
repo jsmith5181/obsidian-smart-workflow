@@ -40,7 +40,7 @@
 
 ### Manual Installation (Recommended)
 1.  Download `main.js`, `manifest.json`, `styles.css` from [Releases](https://github.com/ZyphrZero/obsidian-smart-workflow/releases).
-2.  Place the files in your library directory: `.obsidian/plugins/smart-workflow/`.
+2.  Place the files in your library directory: `.obsidian/plugins/obsidian-smart-workflow/`.
 3.  Restart Obsidian and enable the plugin in the settings.
 
 ### Source Code Compilation
