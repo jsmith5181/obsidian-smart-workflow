@@ -188,4 +188,4 @@ git push origin 1.0.0
 - `scripts/build-rust.js` - 本地 Rust 构建脚本
 - `scripts/package-plugin.js` - 插件打包脚本
 - `pty-server/Cargo.toml` - Rust 项目配置
-- `package.json` - npm 脚本配置
+- `package.json` - pnpm 脚本配置

@@ -66,18 +66,10 @@ jobs:
           sudo apt-get install -y gcc-aarch64-linux-gnu
 
       - name: Cache Rust dependencies
-        uses: actions/cache@v3
+        uses: Swatinem/rust-cache@v2
         with:
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            pty-server/target/
-          key: ${{ runner.os }}-cargo-${{ matrix.target }}-${{ hashFiles('pty-server/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-${{ matrix.target }}-
-            ${{ runner.os }}-cargo-
+          workspaces: pty-server -> target
+          key: ${{ matrix.target }}
 
       - name: Build PTY server
         working-directory: pty-server
@@ -129,6 +121,9 @@ jobs:
         with:
           node-version: '18'
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Download all Rust binaries
         uses: actions/download-artifact@v4
         with:
@@ -144,10 +139,10 @@ jobs:
           chmod +x binaries/pty-server-linux-arm64 || true
 
       - name: Install dependencies
-        run: npm install
+        run: pnpm i
 
       - name: Build plugin
-        run: npm run build
+        run: pnpm build
 
       - name: Create plugin package directory
         run: |

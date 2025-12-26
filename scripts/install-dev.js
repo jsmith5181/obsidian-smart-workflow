@@ -261,10 +261,10 @@ async function main() {
     log('\n❌ 错误: 缺少必需文件', 'red');
     log('请先运行以下命令:', 'yellow');
     if (missingFiles.some(f => f.endsWith('.js') || f.endsWith('.json') || f.endsWith('.css'))) {
-      log('  npm run build', 'yellow');
+      log('  pnpm build', 'yellow');
     }
     if (missingFiles.some(f => f.includes('binaries'))) {
-      log('  npm run build:rust', 'yellow');
+      log('  pnpm build:rust', 'yellow');
     }
     closeReadline();
     process.exit(1);
@@ -417,9 +417,9 @@ async function main() {
   }
 
   log('💡 提示:', 'cyan');
-  log('  - 修改代码后运行 npm run build，然后在 Obsidian 中重新加载插件', 'yellow');
+  log('  - 修改代码后运行 pnpm build，然后在 Obsidian 中重新加载插件', 'yellow');
   log('  - 按 Ctrl+Shift+I 打开开发者工具查看日志', 'yellow');
-  log('  - 快速安装: npm run install:dev:force\n', 'yellow');
+  log('  - 快速安装: pnpm install:dev:force\n', 'yellow');
 
   closeReadline();
 }

@@ -8,23 +8,23 @@
 
 ```bash
 # 1. 安装依赖
-npm install
+pnpm i
 
 # 2. 构建插件代码
-npm run build
+pnpm build
 
 # 3. 构建当前平台的二进制（仅在修改 Rust 代码时需要）
-# 推荐：直接调用脚本（避免 npm 警告）
+# 推荐：直接调用脚本（避免 pnpm 警告）
 node scripts/build-rust.js win32-x64      # Windows
 node scripts/build-rust.js darwin-arm64   # macOS Apple Silicon
 node scripts/build-rust.js darwin-x64     # macOS Intel
 node scripts/build-rust.js linux-x64      # Linux
 
-# 或者通过 npm（需要使用 -- 分隔符）
-npm run build:rust -- win32-x64
+# 或者通过 pnpm（需要使用 -- 分隔符）
+pnpm build:rust -- win32-x64
 
 # 4. 安装到 Obsidian
-npm run install:dev
+pnpm install:dev
 ```
 
 ---
@@ -34,14 +34,14 @@ npm run install:dev
 ### build-rust.js - 构建 Rust 二进制
 
 ```bash
-# 推荐：直接调用脚本（避免 npm 警告）
+# 推荐：直接调用脚本（避免 pnpm 警告）
 node scripts/build-rust.js win32-x64
 
-# 或通过 npm（需要 -- 分隔符）
-npm run build:rust -- win32-x64
+# 或通过 pnpm（需要 -- 分隔符）
+pnpm build:rust -- win32-x64
 
 # 构建所有平台（仅用于发布，需要 CI/CD）
-npm run build:rust
+pnpm build:rust
 ```
 
 **支持的平台**: `win32-x64`, `darwin-x64`, `darwin-arm64`, `linux-x64`, `linux-arm64`
@@ -56,10 +56,10 @@ npm run build:rust
 
 ```bash
 # 基本打包
-npm run package
+pnpm package
 
 # 打包并创建 ZIP
-npm run package -- --zip
+pnpm package -- --zip
 ```
 
 **输出**: `dist/obsidian-smart-workflow-{version}/`
@@ -71,7 +71,7 @@ npm run package -- --zip
 ### install-dev.js - 交互式安装
 
 ```bash
-npm run install:dev
+pnpm install:dev
 ```
 
 交互式引导安装插件到 Obsidian，适合首次使用。
@@ -115,7 +115,7 @@ git push origin vx.x.x
 **解决方案**:
 ```bash
 # 构建当前平台的二进制
-npm run build:rust -- win32-x64  # 或你的平台
+pnpm build:rust -- win32-x64  # 或你的平台
 ```
 
 ---

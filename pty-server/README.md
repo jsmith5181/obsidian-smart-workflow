@@ -48,7 +48,7 @@ cargo test
 
 ```bash
 # 构建所有平台
-npm run build:rust
+pnpm build:rust
 
 # 构建特定平台
 node scripts/build-rust.js win32-x64

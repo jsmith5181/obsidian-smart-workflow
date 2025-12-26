@@ -34,7 +34,7 @@ for (const file of requiredFiles) {
   const filePath = path.join(ROOT_DIR, file);
   if (!fs.existsSync(filePath)) {
     console.error(`❌ 错误: 缺少必需文件 ${file}`);
-    console.error('请先运行 npm run build');
+    console.error('请先运行 pnpm build');
     process.exit(1);
   }
 }
@@ -63,7 +63,7 @@ for (const platform of BUILTIN_PLATFORMS) {
 if (missingBinaries.length > 0) {
   console.error('');
   console.error(`❌ 错误: 缺少 ${missingBinaries.length} 个二进制文件`);
-  console.error('请先运行: npm run build:rust');
+  console.error('请先运行: pnpm build:rust');
   process.exit(1);
 }
 console.log('✅ 所有内置平台二进制文件存在');

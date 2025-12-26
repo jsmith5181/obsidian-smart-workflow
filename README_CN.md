@@ -47,10 +47,10 @@ git clone https://github.com/ZyphrZero/obsidian-smart-workflow.git
 cd obsidian-smart-workflow
 
 # 安装依赖
-npm install
+pnpm i
 
 # 构建插件
-npm run build
+pnpm build
 
 # 构建 PTY 服务器二进制（终端功能需要）
 node scripts/build-rust.js win32-x64      # Windows
@@ -59,7 +59,7 @@ node scripts/build-rust.js darwin-x64     # macOS Intel
 node scripts/build-rust.js linux-x64      # Linux
 
 # 安装到 Obsidian（交互式）
-npm run install:dev
+pnpm install:dev
 ```
 
 更多详情请参阅 [构建脚本指南](./scripts/README.md)。

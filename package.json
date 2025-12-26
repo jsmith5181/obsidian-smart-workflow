@@ -3,6 +3,7 @@
   "version": "1.1.2",
   "description": "A smart workflow plugin for Obsidian that streamlines your knowledge management with intelligent note naming and integrated terminal.",
   "main": "main.js",
+  "packageManager": "pnpm@10.0.0",
   "scripts": {
     "dev": "node esbuild.config.mjs",
     "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
@@ -10,7 +11,7 @@
     "build:rust:all": "node scripts/build-rust.js",
     "package": "node scripts/package-plugin.js",
     "package:zip": "node scripts/package-plugin.js --zip",
-    "release": "npm run build && npm run build:rust && npm run package:zip",
+    "release": "pnpm build && pnpm build:rust && pnpm package:zip",
     "install:dev": "node scripts/install-dev.js",
     "install:dev:force": "node scripts/install-dev.js -f --kill"
   },

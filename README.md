@@ -50,10 +50,10 @@ git clone https://github.com/ZyphrZero/obsidian-smart-workflow.git
 cd obsidian-smart-workflow
 
 # Install dependencies
-npm install
+pnpm i
 
 # Build plugin
-npm run build
+pnpm build
 
 # Build PTY server binary (for terminal feature)
 node scripts/build-rust.js win32-x64      # Windows
@@ -62,7 +62,7 @@ node scripts/build-rust.js darwin-x64     # macOS Intel
 node scripts/build-rust.js linux-x64      # Linux
 
 # Install to Obsidian (interactive)
-npm run install:dev
+pnpm install:dev
 ```
 
 For more details, see [Build Scripts Guide](./scripts/README.md).
