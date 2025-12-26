@@ -14,22 +14,18 @@ const SHELL_INTEGRATION_ZSH: &str = " eval '__sw_cwd(){ printf \"\\e]7;file://%s
 // Fish: 使用事件监听
 const SHELL_INTEGRATION_FISH: &str = " eval 'function __sw_cwd --on-variable PWD; printf \"\\e]7;file://%s%s\\e\\\\\" (hostname) $PWD; end' 2>/dev/null;__sw_cwd;printf '\\ec'\n";
 
-// PowerShell: 重写 prompt 函数
-const SHELL_INTEGRATION_PWSH: &str = " $null = Invoke-Expression 'if(-not $env:__sw_i){$env:__sw_i=1;function __sw_cwd{Write-Host -NoNewline \"`e]9;9;$($PWD.Path)`e\\\"};$__sw_op=$function:prompt;function global:prompt{__sw_cwd;if($__sw_op){&$__sw_op}else{\"PS $PWD> \"}}}';__sw_cwd;Clear-Host\n";
-
-// CMD: 使用 DOSKEY 宏拦截 cd 命令，并设置自定义 PROMPT
-// 注意：CMD 的 OSC 支持有限，使用 OSC 9;9 格式（Windows Terminal 支持）
-// $p 是当前路径，$e 是 ESC 字符
-const SHELL_INTEGRATION_CMD: &str = "@echo off & doskey cd=cd $* ^& echo $e]9;9;%CD%$e\\ & prompt $e]9;9;$p$e\\$p$g & cls\n";
+// 注意：Windows shells (cmd/pwsh) 不支持可靠的 Shell Integration
+// 依赖前端的 prompt 解析来获取 CWD
 
 /// 获取 shell integration 脚本
+/// 注意：Windows 原生 shells (pwsh/cmd) 不使用 Shell Integration，依赖前端 prompt 解析
+/// WSL 运行 Linux shell，支持 Shell Integration
 pub fn get_shell_integration_script(shell_type: &str) -> Option<&'static str> {
     match shell_type {
-        "bash" | "gitbash" => Some(SHELL_INTEGRATION_BASH),
+        "bash" | "gitbash" | "wsl" => Some(SHELL_INTEGRATION_BASH),
         "zsh" => Some(SHELL_INTEGRATION_ZSH),
         "fish" => Some(SHELL_INTEGRATION_FISH),
-        "pwsh" | "powershell" => Some(SHELL_INTEGRATION_PWSH),
-        "cmd" => Some(SHELL_INTEGRATION_CMD),
+        // Windows 原生 shells 不注入脚本，使用前端 prompt 解析
         _ => None,
     }
 }

@@ -1222,7 +1222,7 @@ export class TerminalInstance {
       }
     }
     
-    // OSC 9;9 格式 (Windows Terminal/CMD/PowerShell): \x1b]9;9;path\x07
+    // OSC 9;9 格式 (Windows Terminal/PowerShell): \x1b]9;9;path\x07
     // eslint-disable-next-line no-control-regex
     const osc9Match = data.match(/\x1b\]9;9;([^\x07\x1b]+)[\x07\x1b]/);
     if (osc9Match) {
@@ -1243,6 +1243,26 @@ export class TerminalInstance {
       }
       this.currentCwd = path;
       debugLog('[Terminal CWD] OSC0 (Git Bash) matched:', path);
+      return;
+    }
+    
+    // Windows shells prompt 解析 (fallback)
+    // eslint-disable-next-line no-control-regex
+    const cleanData = data.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '');
+    
+    // PowerShell prompt: PS path>
+    const psMatch = cleanData.match(/PS ([A-Za-z]:[^>\r\n]+)>/);
+    if (psMatch) {
+      this.currentCwd = psMatch[1].trimEnd();
+      debugLog('[Terminal CWD] PowerShell prompt matched:', this.currentCwd);
+      return;
+    }
+    
+    // CMD prompt: path>
+    const cmdMatch = cleanData.match(/^([A-Za-z]:\\[^>\r\n]*)>/m);
+    if (cmdMatch) {
+      this.currentCwd = cmdMatch[1].trimEnd();
+      debugLog('[Terminal CWD] CMD prompt matched:', this.currentCwd);
     }
   }
 
