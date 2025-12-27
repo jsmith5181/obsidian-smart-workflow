@@ -1,7 +1,7 @@
 # Smart Workflow
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-[![Obsidian Downloads](https://img.shields.io/badge/dynamic/json?logo=obsidian&color=%23483699&label=downloads&query=%24%5B%22obsidian-smart-workflow%22%5D.downloads&url=https%3A%2F%2Fraw.githubusercontent.com%2Fobsidianmd%2Fobsidian-releases%2Fmaster%2Fcommunity-plugin-stats.json)](https://obsidian.md/plugins?id=obsidian-smart-workflow)
+[![GitHub Downloads](https://img.shields.io/github/downloads/ZyphrZero/obsidian-smart-workflow/total?logo=github&color=blue)](https://github.com/ZyphrZero/obsidian-smart-workflow/releases)
 
 **Smart Workflow** 是一款强大的 Obsidian 智能工作流插件，通过智能笔记命名和集成终端功能，提升您的知识管理效率。告别起名困难和频繁切换窗口，让一切都在 Obsidian 中高效完成。
 
