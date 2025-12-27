@@ -120,8 +120,7 @@ export class BinaryManager {
       }
       
       await this.ensureExecutable(binaryInfo.path);
-      
-      debugLog('[BinaryManager] 二进制文件就绪:', binaryInfo.path);
+
       return binaryInfo.path;
       
     } catch (error) {

@@ -37,10 +37,9 @@ export class FileNameService {
   /**
    * 生成文件名并重命名文件
    * @param file 目标文件
-   * @param configId 配置 ID（可选）
    * @returns 重命名结果
    */
-  async generateAndRename(file: TFile, configId?: string): Promise<RenameResult> {
+  async generateAndRename(file: TFile): Promise<RenameResult> {
     // 读取文件内容
     const content = await this.app.vault.read(file);
 
@@ -74,16 +73,14 @@ export class FileNameService {
       debugLog('[FileNameService] 参数:', {
         contentLength: content.length,
         currentFileName,
-        hasDirectoryStyle: !!directoryNamingStyle,
-        configId
+        hasDirectoryStyle: !!directoryNamingStyle
       });
     }
 
     const newFileName = await this.aiService.generateFileName(
       content,
       currentFileName,
-      directoryNamingStyle,
-      configId
+      directoryNamingStyle
     );
 
     if (this.settings.debugMode) {

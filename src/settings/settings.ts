@@ -1,16 +1,98 @@
+// ============================================================================
+// 多供应商 AI 配置类型定义
+// ============================================================================
+
 /**
- * API 配置接口
+ * AI 功能类型
+ * - naming: 文件命名功能
+ * - translation: 翻译功能（预留）
  */
-export interface APIConfig {
-  id: string;                    // 配置 ID
-  name: string;                  // 配置名称
-  endpoint: string;              // API 端点
-  apiKey: string;                // API 密钥
-  model: string;                 // 模型名称
-  temperature: number;           // 温度参数 (0-2)
-  maxTokens: number;             // 最大 token 数
-  topP: number;                  // Top P 参数 (0-1)
-  promptTemplate: string;        // Prompt 模板
+export type AIFeature = 'naming' | 'translation';
+
+/**
+ * 模型基本类型
+ * - chat: 对话/文本生成
+ * - image: 图像生成
+ * - embedding: 向量化/嵌入
+ * - asr: 语音识别
+ * - tts: 语音合成
+ */
+export type ModelType = 'chat' | 'image' | 'embedding' | 'asr' | 'tts';
+
+/**
+ * 模型能力类型（主要用于 chat 类型模型）
+ * - vision: 视觉/图像理解
+ * - functionCall: 函数调用/工具使用
+ * - reasoning: 推理/思考能力
+ * - webSearch: 联网搜索
+ * - files: 文件处理
+ */
+export type ModelAbility = 'vision' | 'functionCall' | 'reasoning' | 'webSearch' | 'files';
+
+/**
+ * API 格式类型
+ * - chat-completions: 传统 Chat Completions API (/v1/chat/completions)
+ * - responses: 新 Responses API (/v1/responses)，专为推理模型设计
+ */
+export type APIFormat = 'chat-completions' | 'responses';
+
+/**
+ * 推理深度类型（仅用于 Responses API）
+ * - low: 快速响应，较少推理
+ * - medium: 平衡模式（默认）
+ * - high: 深度推理，更长时间
+ */
+export type ReasoningEffort = 'low' | 'medium' | 'high';
+
+/**
+ * 模型配置接口
+ * 属于某个供应商，包含模型名称和参数
+ */
+export interface ModelConfig {
+  id: string;              // 唯一标识符
+  name: string;            // 模型名称（API 调用用，如 'gpt-3.5-turbo'）
+  displayName: string;     // 显示名称（UI 展示用）
+  temperature: number;     // 温度参数 (0-2)
+  maxTokens: number;       // 最大 token 数
+  topP: number;            // Top P 参数 (0-1)
+  type?: ModelType;        // 模型基本类型
+  abilities?: ModelAbility[]; // 模型能力列表（主要用于 chat 类型）
+  contextLength?: number;  // 上下文长度（可选）
+  apiFormat?: APIFormat;   // API 格式，默认 'chat-completions'
+  reasoningEffort?: ReasoningEffort; // 推理深度，默认 'medium'（仅用于 Responses API）
+  showReasoningSummary?: boolean; // 是否显示推理摘要（仅用于 Responses API）
+}
+
+/**
+ * AI 供应商配置接口
+ * 包含 API 端点、认证信息和该供应商下的模型列表
+ */
+export interface Provider {
+  id: string;              // 唯一标识符
+  name: string;            // 供应商名称（如 'OpenAI', 'Anthropic'）
+  endpoint: string;        // API 端点
+  apiKey: string;          // API 密钥
+  models: ModelConfig[];   // 该供应商下的模型列表
+}
+
+/**
+ * 功能绑定配置接口
+ * 将某个 AI 功能与特定的供应商+模型组合关联
+ */
+export interface FeatureBinding {
+  providerId: string;      // 绑定的供应商 ID
+  modelId: string;         // 绑定的模型 ID
+  promptTemplate: string;  // 该功能的 Prompt 模板
+}
+
+/**
+ * 解析后的完整配置接口
+ * 供 AIService 使用，包含完整的供应商和模型信息
+ */
+export interface ResolvedConfig {
+  provider: Provider;      // 完整的供应商信息
+  model: ModelConfig;      // 完整的模型配置
+  promptTemplate: string;  // Prompt 模板
 }
 
 /** Windows 平台支持的 Shell 类型 */
@@ -127,13 +209,18 @@ export interface FeatureVisibilitySettings {
  * 插件设置接口
  */
 export interface SmartWorkflowSettings {
-  configs: APIConfig[];          // 多配置列表
-  activeConfigId: string;        // 当前活动配置 ID
+  // AI 配置（新结构）
+  providers: Provider[];                                    // 供应商列表
+  featureBindings: Partial<Record<AIFeature, FeatureBinding>>; // 功能绑定
+
+  // 通用 AI 设置
   defaultPromptTemplate: string; // 默认 Prompt 模板
   useCurrentFileNameContext: boolean;  // 是否使用当前文件名作为上下文
   analyzeDirectoryNamingStyle: boolean; // 是否分析目录下其他文件命名风格
-  debugMode: boolean;            // 调试模式（在控制台显示详细日志）
   timeout: number;               // 请求超时时间（毫秒）
+
+  // 其他设置
+  debugMode: boolean;            // 调试模式（在控制台显示详细日志）
   terminal: TerminalSettings;    // 终端设置
   featureVisibility: FeatureVisibilitySettings; // 功能显示设置
 }
@@ -309,23 +396,22 @@ export const DEFAULT_FEATURE_VISIBILITY: FeatureVisibilitySettings = {
 };
 
 /**
+ * 默认功能绑定配置
+ */
+export const DEFAULT_FEATURE_BINDINGS: Partial<Record<AIFeature, FeatureBinding>> = {
+  naming: {
+    providerId: '',
+    modelId: '',
+    promptTemplate: ADVANCED_PROMPT_TEMPLATE
+  }
+};
+
+/**
  * 默认设置
  */
 export const DEFAULT_SETTINGS: SmartWorkflowSettings = {
-  configs: [
-    {
-      id: 'default',
-      name: 'Default',
-      endpoint: 'https://api.openai.com/v1/chat/completions',
-      apiKey: '',
-      model: 'gpt-3.5-turbo',
-      temperature: 0.7,
-      maxTokens: 300,
-      topP: 1.0,
-      promptTemplate: ADVANCED_PROMPT_TEMPLATE
-    }
-  ],
-  activeConfigId: 'default',
+  providers: [],
+  featureBindings: {},
   defaultPromptTemplate: ADVANCED_PROMPT_TEMPLATE,
   useCurrentFileNameContext: true,  // 默认使用当前文件名上下文
   analyzeDirectoryNamingStyle: false, // 默认不分析目录命名风格（性能考虑）

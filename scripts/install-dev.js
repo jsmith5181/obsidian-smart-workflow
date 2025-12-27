@@ -2,12 +2,14 @@
  * Development Environment Install Script
  * Copy plugin files to Obsidian plugins directory for testing
  * 
+ * ⚠️  WARNING: This script will OVERWRITE existing files by default!
+ * 
  * Usage:
- *   node scripts/install-dev.js              # Interactive mode
- *   node scripts/install-dev.js -f           # Force mode (skip confirmation)
+ *   node scripts/install-dev.js              # Default: force overwrite + build
  *   node scripts/install-dev.js --kill       # Auto-close Obsidian process
- *   node scripts/install-dev.js -f --kill    # Force mode + auto-close Obsidian
+ *   node scripts/install-dev.js --no-build   # Skip build step
  *   node scripts/install-dev.js --reset      # Reset saved configuration
+ *   node scripts/install-dev.js -i           # Interactive mode (ask before overwrite)
  */
 
 const fs = require('fs');
@@ -20,9 +22,10 @@ const CONFIG_FILE = path.join(ROOT_DIR, '.dev-install-config.json');
 
 // Parse command line arguments
 const args = process.argv.slice(2);
-const FORCE_MODE = args.includes('-f') || args.includes('--force');
+const INTERACTIVE_MODE = args.includes('-i') || args.includes('--interactive');
 const KILL_OBSIDIAN = args.includes('--kill');
 const RESET_CONFIG = args.includes('--reset');
+const SKIP_BUILD = args.includes('--no-build');
 
 // Color output
 const colors = {
@@ -103,6 +106,26 @@ function killObsidian() {
     log('  ✓ Obsidian process closed', 'green');
     return true;
   } catch (e) {
+    return false;
+  }
+}
+
+// Kill PTY server process
+function killPtyServer() {
+  const platform = getPlatform();
+  try {
+    if (platform === 'windows') {
+      // 终止所有 pty-server 进程
+      execSync('taskkill /F /IM pty-server-win32-x64.exe 2>nul', { stdio: 'ignore' });
+    } else if (platform === 'macos') {
+      execSync('pkill -f pty-server-darwin 2>/dev/null || true', { stdio: 'ignore' });
+    } else {
+      execSync('pkill -f pty-server-linux 2>/dev/null || true', { stdio: 'ignore' });
+    }
+    log('  ✓ PTY server process terminated', 'green');
+    return true;
+  } catch (e) {
+    // 进程可能不存在，忽略错误
     return false;
   }
 }
@@ -197,11 +220,14 @@ function question(query) {
 
 async function main() {
   log('\n📦 Obsidian Plugin Development Install Tool\n', 'cyan');
+  log('   ⚠️  WARNING: Will OVERWRITE existing files by default!', 'yellow');
+  log('   Use -i flag for interactive mode\n', 'gray');
   
-  if (FORCE_MODE || KILL_OBSIDIAN) {
+  if (INTERACTIVE_MODE || KILL_OBSIDIAN || SKIP_BUILD) {
     const modes = [];
-    if (FORCE_MODE) modes.push('Force mode');
+    if (INTERACTIVE_MODE) modes.push('Interactive mode');
     if (KILL_OBSIDIAN) modes.push('Auto-close Obsidian');
+    if (SKIP_BUILD) modes.push('Skip build');
     log(`   Mode: ${modes.join(' + ')}`, 'gray');
   }
 
@@ -215,6 +241,42 @@ async function main() {
   }
 
   const config = loadConfig();
+
+  // 0. Build the plugin
+  if (!SKIP_BUILD) {
+    // 0.1 ESLint check
+    log('🔍 Running ESLint check...', 'cyan');
+    try {
+      execSync('npx eslint src --ext .ts', { cwd: ROOT_DIR, stdio: 'inherit' });
+      log('  ✓ ESLint check passed\n', 'green');
+    } catch (error) {
+      log('\n❌ ESLint check failed', 'red');
+      closeReadline();
+      process.exit(1);
+    }
+
+    // 0.2 TypeScript type check
+    log('🔍 Running TypeScript type check...', 'cyan');
+    try {
+      execSync('npx tsc --noEmit', { cwd: ROOT_DIR, stdio: 'inherit' });
+      log('  ✓ TypeScript check passed\n', 'green');
+    } catch (error) {
+      log('\n❌ TypeScript type check failed', 'red');
+      closeReadline();
+      process.exit(1);
+    }
+
+    // 0.3 Build
+    log('🔨 Building plugin...', 'cyan');
+    try {
+      execSync('pnpm build', { cwd: ROOT_DIR, stdio: 'inherit' });
+      log('  ✓ Build completed\n', 'green');
+    } catch (error) {
+      log('\n❌ Build failed', 'red');
+      closeReadline();
+      process.exit(1);
+    }
+  }
 
   // 1. Check required files
   log('🔍 Checking required files...', 'cyan');
@@ -307,7 +369,7 @@ async function main() {
   log(`\n📂 Target directory: ${targetDir}`, 'cyan');
 
   if (fs.existsSync(targetDir)) {
-    if (!FORCE_MODE) {
+    if (INTERACTIVE_MODE) {
       const overwrite = await question('\n⚠️  Target directory exists, overwrite? (y/n): ');
       if (overwrite.toLowerCase() !== 'y') {
         log('\n❌ Cancelled', 'yellow');
@@ -315,7 +377,7 @@ async function main() {
         process.exit(0);
       }
     } else {
-      log('  ⚠️  Target directory exists, force overwriting', 'yellow');
+      log('  ⚠️  Target directory exists, overwriting...', 'yellow');
     }
   } else {
     fs.mkdirSync(targetDir, { recursive: true });
@@ -326,8 +388,11 @@ async function main() {
   if (KILL_OBSIDIAN && isObsidianRunning()) {
     log('\n🔄 Closing Obsidian process...', 'cyan');
     killObsidian();
-    await sleep(1000);
   }
+
+  // 4.5. Kill PTY server process to release file locks
+  log('\n🔄 Terminating PTY server process...', 'cyan');
+  killPtyServer();
 
   // 5. Copy files
   log('\n📋 Copying files...', 'cyan');
@@ -384,7 +449,6 @@ async function main() {
   // 6. If Obsidian was closed earlier, restart it
   if (KILL_OBSIDIAN) {
     log('\n🚀 Restarting Obsidian...', 'cyan');
-    await sleep(500);
     startObsidian();
   }
 

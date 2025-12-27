@@ -4,21 +4,30 @@ This directory contains automation scripts for building, packaging, and developi
 
 ## Quick Start
 
-### Local Development
+### First-time Setup
 
 ```bash
 # 1. Install dependencies
 pnpm i
 
-# 2. Build plugin code
-pnpm build
+# 2. Build Rust binary (only needed once)
+pnpm build:rust
 
-# 3. Build Rust binary for current platform
-node scripts/build-rust.js
-
-# 4. Install to Obsidian
+# 3. Build and install to Obsidian
 pnpm install:dev
 ```
+
+### Daily Development Workflow
+
+```bash
+# After modifying code, just run (automatically executes pnpm build)
+pnpm install:dev
+
+# Then in Obsidian:
+# → Settings → Community plugins → Click "Reload" button on Smart Workflow title
+```
+
+> 💡 **Tip**: `pnpm install:dev` includes automatic build, no need to run `pnpm build` manually
 
 ---
 
@@ -59,13 +68,32 @@ pnpm package -- --zip
 
 ---
 
-### install-dev.js - Interactive Install
+### install-dev.js - Development Install
 
 ```bash
+# Standard install (auto build + install)
 pnpm install:dev
+
+# Skip build (copy files only)
+pnpm install:dev --no-build
+
+# Auto-close and restart Obsidian
+pnpm install:dev --kill
+
+# Interactive mode (ask before overwrite)
+pnpm install:dev -i
+
+# Reset saved configuration
+pnpm install:dev --reset
 ```
 
-Interactive guide to install the plugin to Obsidian, ideal for first-time setup.
+**Workflow**:
+1. Automatically executes `pnpm build` (unless `--no-build` is used)
+2. Checks required files (main.js, manifest.json, styles.css, binary files)
+3. Copies files to Obsidian plugins directory
+4. First run prompts for plugins directory path, then remembers it
+
+**After Install**: In Obsidian Settings → Community plugins → Click "Reload" button on Smart Workflow title
 
 ---
 
@@ -94,9 +122,34 @@ git push origin vx.x.x
 
 ### Missing Binary Files
 
+Running `pnpm install:dev` shows missing `binaries/pty-server-*` files.
+
 **Solution**:
 ```bash
 pnpm build:rust
+```
+
+This command automatically detects your current platform and builds the corresponding binary, no need to specify platform parameters.
+
+### Files Locked and Cannot Be Copied
+
+Obsidian is using the PTY server binary file.
+
+> 💡 **Tip**: `pnpm install:dev` automatically terminates the PTY server process to release file locks, usually no manual action needed.
+
+If you still encounter file lock issues:
+```bash
+# Use --kill flag to auto-close Obsidian
+pnpm install:dev --kill
+```
+
+### Reset Plugin Directory Configuration
+
+Entered wrong plugin directory path on first run.
+
+**Solution**:
+```bash
+pnpm install:dev --reset
 ```
 
 ---

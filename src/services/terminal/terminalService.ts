@@ -101,7 +101,6 @@ export class TerminalService {
       debugLog('[TerminalService] 启动 PTY 服务器...');
       
       const binaryPath = await this.binaryManager.ensureBinary();
-      debugLog('[TerminalService] 二进制文件路径:', binaryPath);
       
       // 使用端口 0 让系统自动分配可用端口
       this.ptyServerProcess = spawn(binaryPath, ['--port', '0'], {
@@ -442,6 +441,12 @@ export class TerminalService {
         errorLog(`[TerminalService] 销毁终端 ${id} 失败:`, error);
       } finally {
         this.terminals.delete(id);
+        
+        // 如果没有终端实例了，停止 PTY 服务器
+        if (this.terminals.size === 0) {
+          debugLog('[TerminalService] 所有终端已关闭，停止 PTY 服务器');
+          await this.stopPtyServer();
+        }
       }
     }
   }

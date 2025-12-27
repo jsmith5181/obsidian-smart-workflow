@@ -70,9 +70,11 @@ export interface TranslationKeys {
     operationFailed: string;
     connectionSuccess: string;
     connectionFailed: string;
+    testingConnection: string;
     configDeleted: string;
     cannotDeleteDefault: string;
     cannotDeleteLast: string;
+    cannotDeleteLastModel: string;
     ptyServerStartFailed: string;
     // 终端相关
     terminal: {
@@ -142,6 +144,7 @@ export interface TranslationKeys {
       title: string;
       feedbackText: string;
       feedbackLink: string;
+      reload: string;
     };
   };
 
@@ -155,7 +158,6 @@ export interface TranslationKeys {
       addConfig: string;
       renameConfig: string;
       deleteConfig: string;
-      apiConfig: string;
       apiEndpoint: string;
       apiEndpointDesc: string;
       testConnection: string;
@@ -173,6 +175,41 @@ export interface TranslationKeys {
       topPDesc: string;
       timeout: string;
       timeoutDesc: string;
+      // 新增：功能绑定
+      featureBindings: string;
+      featureBindingsDesc: string;
+      namingFeature: string;
+      namingFeatureDesc: string;
+      currentBindingStatus: string;
+      // 新增：供应商管理
+      providerManagement: string;
+      providerManagementDesc: string;
+      addProvider: string;
+      editProvider: string;
+      deleteProvider: string;
+      noProviders: string;
+      noModelsToTest: string;
+      // 新增：模型管理
+      models: string;
+      addModel: string;
+      editModel: string;
+      deleteModel: string;
+      copyModelId: string;
+      modelIdCopied: string;
+      noModels: string;
+      fetchModels: string;
+      fetchingModels: string;
+      fetchModelsSuccess: string;
+      fetchModelsFailed: string;
+      fetchModelsNoApiKey: string;
+      fetchModelsInvalidResponse: string;
+      fetchModelsEmpty: string;
+      selectModels: string;
+      selectModelsDesc: string;
+      modelCapabilities: string;
+      noModelsFound: string;
+      addSelectedModels: string;
+      modelsAdded: string;
     };
     naming: {
       namingBehavior: string;
@@ -289,6 +326,61 @@ export interface TranslationKeys {
       title: string;
       warning: string;
     };
+    // 新增：供应商编辑弹窗
+    providerEdit: {
+      titleAdd: string;
+      titleEdit: string;
+      name: string;
+      nameDesc: string;
+      namePlaceholder: string;
+      nameRequired: string;
+      endpoint: string;
+      endpointDesc: string;
+      endpointRequired: string;
+      apiKey: string;
+      apiKeyDesc: string;
+    };
+    // 新增：模型编辑弹窗
+    modelEdit: {
+      titleAdd: string;
+      titleEdit: string;
+      name: string;
+      nameDesc: string;
+      nameRequired: string;
+      displayName: string;
+      displayNameDesc: string;
+      // API 格式和推理配置
+      apiFormat: string;
+      apiFormatDesc: string;
+      apiFormatChatCompletions: string;
+      apiFormatResponses: string;
+      reasoningEffort: string;
+      reasoningEffortDesc: string;
+      reasoningEffortLow: string;
+      reasoningEffortMedium: string;
+      reasoningEffortHigh: string;
+      showReasoningSummary: string;
+      showReasoningSummaryDesc: string;
+    };
+    // 新增：模型选择弹窗
+    modelSelect: {
+      title: string;
+      desc: string;
+      allExist: string;
+      selectAll: string;
+      addSelected: string;
+      searchPlaceholder: string;
+      refresh: string;
+      refreshing: string;
+      noResults: string;
+      ungrouped: string;
+    };
+    // 新增：测试连接选择模型弹窗
+    testConnection: {
+      title: string;
+      desc: string;
+      selectModel: string;
+    };
   };
 
   // Shell 选项
@@ -361,6 +453,11 @@ export interface TranslationKeys {
     endpointNotConfigured: string;
     endpointEmpty: string;
     configNotFound: string;
+    configNotResolved: string;
+    providerNotFound: string;
+    modelNotFound: string;
+    providerApiKeyNotConfigured: string;
+    providerEndpointNotConfigured: string;
     requestTimeout: string;
     requestFailed: string;
     requestFailedHint: string;
@@ -370,10 +467,17 @@ export interface TranslationKeys {
     responseFormatError: string;
     missingChoices: string;
     missingContent: string;
+    missingOutput: string;
     emptyFileName: string;
     parseError: string;
     testApiKeyInvalid: string;
     testEndpointNotFound: string;
+    // Responses API 相关错误
+    unsupportedApiFormat: string;
+    unsupportedApiFormatHint: string;
+    invalidReasoningEffort: string;
+    responsesApiError: string;
+    responsesApiErrorHint: string;
   };
 
   // 终端实例
@@ -412,5 +516,34 @@ export interface TranslationKeys {
     checksumDownloadFailed: string;
     checksumDownloadTimeout: string;
     cannotSetPermission: string;
+  };
+
+  // 模型类型
+  modelTypes: {
+    all: string;
+    chat: string;
+    image: string;
+    embedding: string;
+    asr: string;
+    tts: string;
+    chatDesc: string;
+    imageDesc: string;
+    embeddingDesc: string;
+    asrDesc: string;
+    ttsDesc: string;
+  };
+
+  // 模型能力
+  modelAbilities: {
+    vision: string;
+    functionCall: string;
+    reasoning: string;
+    webSearch: string;
+    files: string;
+    visionDesc: string;
+    functionCallDesc: string;
+    reasoningDesc: string;
+    webSearchDesc: string;
+    filesDesc: string;
   };
 }
