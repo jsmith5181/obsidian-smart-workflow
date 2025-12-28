@@ -408,7 +408,7 @@ export class GeneralSettingsRenderer extends BaseSettingsRenderer {
 
 
   /**
-   * 渲染模型列表
+   * 渲染模型列表（支持拖拽排序）
    */
   private renderModelList(containerEl: HTMLElement, provider: Provider): void {
     // 模型列表
@@ -430,16 +430,43 @@ export class GeneralSettingsRenderer extends BaseSettingsRenderer {
       return;
     }
 
-    provider.models.forEach(model => {
-      this.renderModelItem(modelsEl, provider, model);
+    // 拖拽状态
+    let draggedIndex: number | null = null;
+
+    provider.models.forEach((model, index) => {
+      this.renderModelItem(modelsEl, provider, model, index, {
+        onDragStart: (idx) => { draggedIndex = idx; },
+        onDragEnd: () => { draggedIndex = null; },
+        onDrop: async (targetIdx) => {
+          if (draggedIndex !== null && draggedIndex !== targetIdx) {
+            this.context.configManager.reorderModel(provider.id, draggedIndex, targetIdx);
+            await this.saveSettings();
+            this.refreshDisplay();
+          }
+        },
+        getDraggedIndex: () => draggedIndex
+      });
     });
   }
 
   /**
-   * 渲染单个模型项
+   * 渲染单个模型项（支持拖拽排序）
    */
-  private renderModelItem(containerEl: HTMLElement, provider: Provider, model: ModelConfig): void {
+  private renderModelItem(
+    containerEl: HTMLElement,
+    provider: Provider,
+    model: ModelConfig,
+    index: number,
+    dragHandlers: {
+      onDragStart: (index: number) => void;
+      onDragEnd: () => void;
+      onDrop: (targetIndex: number) => Promise<void>;
+      getDraggedIndex: () => number | null;
+    }
+  ): void {
     const modelEl = containerEl.createDiv({ cls: 'model-item' });
+    modelEl.setAttribute('draggable', 'true');
+    modelEl.setAttribute('data-index', String(index));
     modelEl.setCssProps({
       display: 'flex',
       'align-items': 'center',
@@ -447,10 +474,62 @@ export class GeneralSettingsRenderer extends BaseSettingsRenderer {
       padding: '6px 8px',
       'margin-bottom': '4px',
       'background-color': 'var(--background-secondary)',
-      'border-radius': '4px'
+      'border-radius': '4px',
+      cursor: 'grab',
+      transition: 'all 0.2s ease',
+      'border-left': '3px solid transparent'
     });
 
-    // 左侧：模型信息和能力标签
+    // 拖拽事件
+    modelEl.addEventListener('dragstart', (e) => {
+      dragHandlers.onDragStart(index);
+      modelEl.style.opacity = '0.4';
+      modelEl.style.transform = 'scale(0.98)';
+      modelEl.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+      if (e.dataTransfer) {
+        e.dataTransfer.effectAllowed = 'move';
+      }
+    });
+
+    modelEl.addEventListener('dragend', () => {
+      dragHandlers.onDragEnd();
+      modelEl.style.opacity = '1';
+      modelEl.style.transform = 'scale(1)';
+      modelEl.style.boxShadow = 'none';
+      modelEl.style.borderLeftColor = 'transparent';
+    });
+
+    modelEl.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.dataTransfer!.dropEffect = 'move';
+      const draggedIdx = dragHandlers.getDraggedIndex();
+      if (draggedIdx !== null && draggedIdx !== index) {
+        modelEl.style.backgroundColor = 'var(--background-modifier-hover)';
+        modelEl.style.borderLeftColor = 'var(--interactive-accent)';
+        // 根据拖拽方向显示上/下边框指示
+        if (draggedIdx < index) {
+          modelEl.style.transform = 'translateY(2px)';
+        } else {
+          modelEl.style.transform = 'translateY(-2px)';
+        }
+      }
+    });
+
+    modelEl.addEventListener('dragleave', () => {
+      modelEl.style.backgroundColor = 'var(--background-secondary)';
+      modelEl.style.borderLeftColor = 'transparent';
+      modelEl.style.transform = 'translateY(0)';
+    });
+
+    modelEl.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      modelEl.style.backgroundColor = 'var(--background-secondary)';
+      modelEl.style.borderLeftColor = 'transparent';
+      modelEl.style.transform = 'translateY(0)';
+      await dragHandlers.onDrop(index);
+    });
+
+    // 左侧：拖拽手柄 + 模型信息和能力标签
     const leftEl = modelEl.createDiv({ cls: 'model-left' });
     leftEl.setCssProps({
       display: 'flex',
@@ -458,6 +537,27 @@ export class GeneralSettingsRenderer extends BaseSettingsRenderer {
       gap: '8px',
       flex: '1',
       'min-width': '0'
+    });
+
+    // 拖拽手柄图标
+    const dragHandle = leftEl.createSpan({ cls: 'drag-handle' });
+    setIcon(dragHandle, 'grip-vertical');
+    dragHandle.setCssProps({
+      color: 'var(--text-faint)',
+      cursor: 'grab',
+      transition: 'color 0.15s ease, transform 0.15s ease',
+      display: 'inline-flex',
+      'align-items': 'center',
+      'flex-shrink': '0'
+    });
+    dragHandle.setAttribute('aria-label', t('settingsDetails.general.dragToReorder'));
+
+    // 悬停时高亮拖拽手柄
+    modelEl.addEventListener('mouseenter', () => {
+      dragHandle.style.color = 'var(--text-muted)';
+    });
+    modelEl.addEventListener('mouseleave', () => {
+      dragHandle.style.color = 'var(--text-faint)';
     });
 
     // 模型信息
@@ -510,7 +610,8 @@ export class GeneralSettingsRenderer extends BaseSettingsRenderer {
     copyButton.setCssProps({
       padding: '2px'
     });
-    copyButton.addEventListener('click', async () => {
+    copyButton.addEventListener('click', async (e) => {
+      e.stopPropagation();
       await navigator.clipboard.writeText(model.name);
       new Notice('✅ ' + t('settingsDetails.general.modelIdCopied'));
     });
@@ -522,7 +623,8 @@ export class GeneralSettingsRenderer extends BaseSettingsRenderer {
     editButton.setCssProps({
       padding: '2px'
     });
-    editButton.addEventListener('click', () => {
+    editButton.addEventListener('click', (e) => {
+      e.stopPropagation();
       const modal = new ModelEditModal(
         this.context.app,
         this.context.configManager,
@@ -543,7 +645,8 @@ export class GeneralSettingsRenderer extends BaseSettingsRenderer {
     deleteButton.setCssProps({
       padding: '2px'
     });
-    deleteButton.addEventListener('click', async () => {
+    deleteButton.addEventListener('click', async (e) => {
+      e.stopPropagation();
       try {
         this.context.configManager.deleteModel(provider.id, model.id);
         await this.saveSettings();

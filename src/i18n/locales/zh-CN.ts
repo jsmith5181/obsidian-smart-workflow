@@ -172,6 +172,7 @@ export const zhCN: TranslationKeys = {
       copyModelId: '复制模型 ID',
       modelIdCopied: '模型 ID 已复制',
       noModels: '暂无模型配置',
+      dragToReorder: '拖拽排序',
       fetchModels: '获取模型列表',
       fetchingModels: '正在获取模型列表...',
       fetchModelsSuccess: '获取到 {{count}} 个模型',

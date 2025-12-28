@@ -215,6 +215,33 @@ export class ConfigManager {
   }
 
   /**
+   * 重新排序模型
+   * @param providerId 供应商 ID
+   * @param fromIndex 原始索引
+   * @param toIndex 目标索引
+   */
+  reorderModel(providerId: string, fromIndex: number, toIndex: number): void {
+    const provider = this.getProvider(providerId);
+    if (!provider) {
+      throw new Error(`Provider not found: ${providerId}`);
+    }
+
+    if (fromIndex < 0 || fromIndex >= provider.models.length ||
+        toIndex < 0 || toIndex >= provider.models.length) {
+      throw new Error('Invalid index for reorder');
+    }
+
+    if (fromIndex === toIndex) {
+      return;
+    }
+
+    // 移动模型
+    const [model] = provider.models.splice(fromIndex, 1);
+    provider.models.splice(toIndex, 0, model);
+    this.saveSettings();
+  }
+
+  /**
    * 验证模型配置参数
    */
   private validateModelConfig(model: Omit<ModelConfig, 'id'>): void {

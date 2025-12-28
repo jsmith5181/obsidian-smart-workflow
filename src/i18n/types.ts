@@ -191,6 +191,7 @@ export interface TranslationKeys {
       copyModelId: string;
       modelIdCopied: string;
       noModels: string;
+      dragToReorder: string;
       fetchModels: string;
       fetchingModels: string;
       fetchModelsSuccess: string;

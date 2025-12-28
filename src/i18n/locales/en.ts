@@ -172,6 +172,7 @@ export const en: TranslationKeys = {
       copyModelId: 'Copy Model ID',
       modelIdCopied: 'Model ID copied',
       noModels: 'No models configured',
+      dragToReorder: 'Drag to reorder',
       fetchModels: 'Fetch Models',
       fetchingModels: 'Fetching model list...',
       fetchModelsSuccess: 'Found {{count}} models',
