@@ -44,9 +44,12 @@ pnpm build:rust
 
 # Skip installing build target
 node scripts/build-rust.js --skip-install
+
+# Clean build cache before building
+node scripts/build-rust.js --clean
 ```
 
-**Output**: `binaries/pty-server-{platform}{ext}` and corresponding `.sha256` file
+**Output**: `binaries/smart-workflow-server-{platform}-{arch}` and corresponding `.sha256` file
 
 > **Note**: Local builds only support the current platform. Cross-compilation requires GitHub Actions.
 
@@ -70,28 +73,40 @@ pnpm package -- --zip
 
 ### install-dev.js - Development Install
 
+⚠️ **Warning**: This script will OVERWRITE existing files by default!
+
 ```bash
-# Standard install (auto build + install)
+# Standard install (auto build + install, force overwrite by default)
 pnpm install:dev
 
-# Skip build (copy files only)
-pnpm install:dev --no-build
+# Run ESLint and TypeScript check before build
+pnpm install:dev --check
 
-# Auto-close and restart Obsidian
+# Auto-close Obsidian process (solves file lock issues)
 pnpm install:dev --kill
+
+# Skip build step (copy files only)
+pnpm install:dev --no-build
 
 # Interactive mode (ask before overwrite)
 pnpm install:dev -i
+pnpm install:dev --interactive
 
 # Reset saved configuration
 pnpm install:dev --reset
+
+# Combine flags
+pnpm install:dev --check --kill
 ```
 
 **Workflow**:
-1. Automatically executes `pnpm build` (unless `--no-build` is used)
-2. Checks required files (main.js, manifest.json, styles.css, binary files)
-3. Copies files to Obsidian plugins directory
-4. First run prompts for plugins directory path, then remembers it
+1. Run ESLint + TypeScript check (only when `--check` is used)
+2. Automatically execute `pnpm build` (unless `--no-build` is used)
+3. Check required files (main.js, manifest.json, styles.css, binary files)
+4. Terminate server processes to release file locks
+5. Copy files to Obsidian plugins directory
+6. Restart Obsidian if `--kill` was used
+7. First run prompts for plugins directory path, then remembers it
 
 **After Install**: In Obsidian Settings → Community plugins → Click "Reload" button on Smart Workflow title
 
@@ -111,10 +126,12 @@ git tag vx.x.x
 git push origin vx.x.x
 
 # 3. GitHub Actions will automatically:
-#    - Build binaries for all platforms
+#    - Build binaries for all platforms (win32-x64, darwin-arm64, darwin-x64, linux-x64, linux-arm64)
 #    - Package the plugin
-#    - Create GitHub Release
+#    - Create GitHub Release (with full package and platform-specific packages)
 ```
+
+No local cross-compilation needed, no manual artifact uploads required.
 
 ---
 
@@ -122,7 +139,7 @@ git push origin vx.x.x
 
 ### Missing Binary Files
 
-Running `pnpm install:dev` shows missing `binaries/pty-server-*` files.
+Running `pnpm install:dev` shows missing `binaries/smart-workflow-server-*` files.
 
 **Solution**:
 ```bash
@@ -133,9 +150,9 @@ This command automatically detects your current platform and builds the correspo
 
 ### Files Locked and Cannot Be Copied
 
-Obsidian is using the PTY server binary file.
+Obsidian is using the server binary file.
 
-> 💡 **Tip**: `pnpm install:dev` automatically terminates the PTY server process to release file locks, usually no manual action needed.
+> 💡 **Tip**: `pnpm install:dev` automatically terminates server processes to release file locks, usually no manual action needed.
 
 If you still encounter file lock issues:
 ```bash
@@ -156,6 +173,6 @@ pnpm install:dev --reset
 
 ## Related Documentation
 
-- [PTY Server Documentation](../pty-server/README.md)
+- [Rust Server Documentation](../rust-servers/README.md)
 - [Main README](../README.md)
-- [GitHub Actions Workflow](../.github/workflows/build-rust.yml)
+- [GitHub Actions Workflow](../.github/workflows/release.yml)

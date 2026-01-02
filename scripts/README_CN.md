@@ -44,9 +44,12 @@ pnpm build:rust
 
 # 跳过安装构建目标
 node scripts/build-rust.js --skip-install
+
+# 清理缓存后重新构建
+node scripts/build-rust.js --clean
 ```
 
-**输出**: `binaries/pty-server-{platform}{ext}` 及对应的 `.sha256` 文件
+**输出**: `binaries/smart-workflow-server-{platform}-{arch}` 及对应的 `.sha256` 文件
 
 > **注意**: 本地构建仅支持当前平台。跨平台编译需要使用 GitHub Actions。
 
@@ -70,28 +73,40 @@ pnpm package -- --zip
 
 ### install-dev.js - 开发安装
 
+⚠️ **注意**: 默认会强制覆盖已有文件！
+
 ```bash
-# 标准安装（自动构建 + 安装）
+# 标准安装（自动构建 + 安装，默认强制覆盖）
 pnpm install:dev
 
-# 跳过构建（仅复制文件）
-pnpm install:dev --no-build
+# 构建前运行 ESLint 和 TypeScript 检查
+pnpm install:dev --check
 
-# 自动关闭并重启 Obsidian
+# 自动关闭 Obsidian 进程（解决文件锁定问题）
 pnpm install:dev --kill
 
-# 交互模式（覆盖前询问）
-pnpm install:dev -i
+# 跳过构建步骤（仅复制文件）
+pnpm install:dev --no-build
 
-# 重置保存的配置
+# 交互模式（覆盖前询问确认）
+pnpm install:dev -i
+pnpm install:dev --interactive
+
+# 重置保存的插件目录配置
 pnpm install:dev --reset
+
+# 组合使用
+pnpm install:dev --check --kill
 ```
 
 **工作流程**:
-1. 自动执行 `pnpm build`（除非使用 `--no-build`）
-2. 检查必需文件（main.js, manifest.json, styles.css, 二进制文件）
-3. 复制文件到 Obsidian 插件目录
-4. 首次运行会提示输入插件目录路径，之后自动记住
+1. 运行 ESLint + TypeScript 检查（仅当使用 `--check` 时）
+2. 自动执行 `pnpm build`（除非使用 `--no-build`）
+3. 检查必需文件（main.js, manifest.json, styles.css, 二进制文件）
+4. 自动终止服务器进程以释放文件锁
+5. 复制文件到 Obsidian 插件目录
+6. 如使用 `--kill`，自动重启 Obsidian
+7. 首次运行会提示输入插件目录路径，之后自动记住
 
 **安装后**: 在 Obsidian 设置 → Community plugins → Smart Workflow 标题处点击「重载」按钮
 
@@ -111,10 +126,12 @@ git tag vx.x.x
 git push origin vx.x.x
 
 # 3. GitHub Actions 将自动:
-#    - 构建所有平台的二进制文件
+#    - 构建所有平台的二进制文件（win32-x64, darwin-arm64, darwin-x64, linux-x64, linux-arm64）
 #    - 打包插件
-#    - 创建 GitHub Release
+#    - 创建 GitHub Release（包含完整包和各平台独立包）
 ```
+
+不用本地交叉编译，不用手动上传产物，省心。
 
 ---
 
@@ -122,7 +139,7 @@ git push origin vx.x.x
 
 ### 缺少二进制文件
 
-运行 `pnpm install:dev` 时提示缺少 `binaries/pty-server-*` 文件。
+运行 `pnpm install:dev` 时提示缺少 `binaries/smart-workflow-server-*` 文件。
 
 **解决方案**:
 ```bash
@@ -133,9 +150,9 @@ pnpm build:rust
 
 ### 文件被锁定无法复制
 
-Obsidian 正在使用 PTY 服务器二进制文件。
+Obsidian 正在使用服务器二进制文件。
 
-> 💡 **提示**: `pnpm install:dev` 会自动终止 PTY 服务器进程以释放文件锁，通常无需手动处理。
+> 💡 **提示**: `pnpm install:dev` 会自动终止服务器进程以释放文件锁，通常无需手动处理。
 
 如果仍然遇到文件锁定问题：
 ```bash
@@ -156,6 +173,6 @@ pnpm install:dev --reset
 
 ## 相关文档
 
-- [PTY 服务器文档](../pty-server/README.md)
+- [Rust 服务器文档](../rust-servers/README_CN.md)
 - [主 README](../README_CN.md)
-- [GitHub Actions 工作流](../.github/workflows/build-rust.yml)
+- [GitHub Actions 工作流](../.github/workflows/release.yml)
