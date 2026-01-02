@@ -46,8 +46,6 @@ macro_rules! log_debug {
 // ============================================================================
 
 /// LLM 流式请求配置
-/// 
-/// Requirements 4.1: stream_start 消息配置
 #[derive(Debug, Clone, Deserialize)]
 pub struct StreamConfig {
     /// API 端点
@@ -138,8 +136,6 @@ struct StreamErrorMessage {
 // ============================================================================
 
 /// LLM 模块处理器
-/// 
-/// Requirements 4.1-4.7: 实现 LLM 流式处理
 pub struct LLMHandler {
     /// WebSocket 发送器
     ws_sender: Arc<TokioMutex<Option<WsSender>>>,
@@ -166,8 +162,6 @@ impl LLMHandler {
     }
     
     /// 开始流式请求
-    /// 
-    /// Requirements 4.1: 发起 HTTP 请求并开始流式解析
     async fn start_stream(&self, config: StreamConfig) -> Result<(), LLMError> {
         log_info!("开始流式请求: endpoint={}", config.endpoint);
         
@@ -261,8 +255,6 @@ impl LLMHandler {
     }
     
     /// 处理流式响应
-    /// 
-    /// Requirements 4.2, 4.3, 4.4, 4.5: 解析 SSE 并发送消息
     async fn process_stream(
         response: reqwest::Response,
         api_format: ApiFormat,
@@ -413,8 +405,6 @@ impl LLMHandler {
     }
     
     /// 发送数据块消息
-    /// 
-    /// Requirements 4.2: 发送 stream_chunk 消息
     async fn send_chunk(ws_sender: &WsSender, content: &str, request_id: Option<&str>) -> Result<(), LLMError> {
         let msg = StreamChunkMessage {
             module: "llm",
@@ -434,8 +424,6 @@ impl LLMHandler {
     }
     
     /// 发送思考内容消息
-    /// 
-    /// Requirements 4.3: 发送 stream_thinking 消息
     async fn send_thinking(ws_sender: &WsSender, content: &str, request_id: Option<&str>) -> Result<(), LLMError> {
         let msg = StreamThinkingMessage {
             module: "llm",
@@ -455,8 +443,6 @@ impl LLMHandler {
     }
     
     /// 发送完成消息
-    /// 
-    /// Requirements 4.4: 发送 stream_complete 消息
     async fn send_complete(ws_sender: &WsSender, full_content: &str, request_id: Option<&str>) -> Result<(), LLMError> {
         let msg = StreamCompleteMessage {
             module: "llm",
@@ -476,8 +462,6 @@ impl LLMHandler {
     }
     
     /// 发送错误消息
-    /// 
-    /// Requirements 4.5: 发送 stream_error 消息
     async fn send_error(ws_sender: &WsSender, error: &LLMError, request_id: Option<&str>) -> Result<(), LLMError> {
         let (code, message) = match error {
             LLMError::NetworkError(msg) => ("NETWORK_ERROR", msg.clone()),
@@ -506,8 +490,6 @@ impl LLMHandler {
     }
     
     /// 取消流式请求
-    /// 
-    /// Requirements 4.6: 取消当前流式请求
     async fn cancel_stream(&self) -> Result<(), LLMError> {
         log_info!("取消流式请求");
         

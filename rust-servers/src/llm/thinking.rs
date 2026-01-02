@@ -17,8 +17,6 @@ pub struct FilterResult {
 /// 支持两种思考标签格式：
 /// 1. `<think>...</think>` - 英文标签
 /// 2. `【思考】...【/思考】` - 中文标签
-/// 
-/// Requirements 4.3: 检测并过滤思考内容标签
 pub struct ThinkingFilter;
 
 impl ThinkingFilter {

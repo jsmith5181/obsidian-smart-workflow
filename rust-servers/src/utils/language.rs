@@ -18,8 +18,6 @@ macro_rules! log_debug {
 // ============================================================================
 
 /// 语言检测结果
-/// 
-/// Requirements 5.2: 返回 ISO 639-1 语言代码和置信度分数
 #[derive(Debug, Clone, Serialize)]
 pub struct LanguageDetectionResult {
     /// ISO 639-1 语言代码
@@ -27,7 +25,6 @@ pub struct LanguageDetectionResult {
     /// 置信度 (0.0 - 1.0)
     pub confidence: f64,
     /// 是否为简体中文 (仅当 language 为 "zh" 时有效)
-    /// Requirements 5.3: 能够区分简体中文和繁体中文
     #[serde(skip_serializing_if = "Option::is_none")]
     pub is_simplified: Option<bool>,
 }
@@ -69,10 +66,6 @@ impl LanguageDetector {
     }
     
     /// 检测文本语言
-    /// 
-    /// Requirements 5.1: 检测文本语言并返回结果
-    /// Requirements 5.2: 返回 ISO 639-1 语言代码和置信度分数
-    /// Requirements 5.3: 能够区分简体中文和繁体中文
     pub fn detect(&self, text: &str) -> LanguageDetectionResult {
         // 空文本返回未知
         if text.trim().is_empty() {
@@ -290,7 +283,6 @@ impl LanguageDetector {
     /// 判断中文文本是简体还是繁体
     /// 
     /// 通过统计简体字和繁体字的数量来判断
-    /// Requirements 5.3: 能够区分简体中文和繁体中文
     fn is_simplified_chinese(&self, text: &str) -> bool {
         let mut simplified_count = 0;
         let mut traditional_count = 0;

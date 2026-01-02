@@ -37,8 +37,6 @@ macro_rules! log_debug {
 // ============================================================================
 
 /// 语言检测请求
-/// 
-/// Requirements 5.1: 收到 detect_language 消息时检测文本语言
 #[derive(Debug, Deserialize)]
 pub struct DetectLanguageRequest {
     /// 要检测的文本
@@ -105,8 +103,6 @@ impl UtilsHandler {
 
     
     /// 处理 Utils 模块消息
-    /// 
-    /// Requirements 5.1: 收到 detect_language 消息时检测文本语言并返回结果
     pub async fn handle(&self, msg: &ModuleMessage) -> Result<Option<ServerResponse>, RouterError> {
         log_info!("Utils 模块处理消息: {}", msg.msg_type);
         
@@ -125,10 +121,6 @@ impl UtilsHandler {
     }
     
     /// 处理语言检测请求
-    /// 
-    /// Requirements 5.1: 检测文本语言并返回结果
-    /// Requirements 5.2: 返回 ISO 639-1 语言代码和置信度分数
-    /// Requirements 5.3: 能够区分简体中文和繁体中文
     async fn handle_detect_language(
         &self,
         msg: &ModuleMessage,

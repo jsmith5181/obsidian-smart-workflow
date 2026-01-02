@@ -17,8 +17,6 @@ pub enum SSEEvent {
 /// SSE 解析器
 /// 
 /// 处理 SSE 流数据，支持跨块解析
-/// 
-/// Requirements 4.2: 解析 SSE 数据块并发送 stream_chunk 消息
 pub struct SSEParser {
     /// 缓冲区，用于存储不完整的行
     buffer: String,

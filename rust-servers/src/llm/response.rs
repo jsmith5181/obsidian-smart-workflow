@@ -104,8 +104,6 @@ pub struct ExtractedContent {
 // ============================================================================
 
 /// 响应解析器
-/// 
-/// Requirements 4.7: 支持 Chat Completions API 和 Responses API 两种响应格式
 pub struct ResponseParser;
 
 impl ResponseParser {
