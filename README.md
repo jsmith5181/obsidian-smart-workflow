@@ -153,7 +153,7 @@ A: Check ASR credentials and ensure microphone permissions are granted.
 
 Join our WeChat group for discussion and support:
 
-<img src="assets/wechat.png" width="200" alt="WeChat Group QR Code">
+<img src="assets/wechat.png" width="400" alt="WeChat Group QR Code">
 
 ---
 
