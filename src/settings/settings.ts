@@ -7,8 +7,10 @@
  * - naming: 文件命名功能
  * - translation: 翻译功能（预留）
  * - writing: 写作功能（润色、缩写、扩写等）
+ * - tagging: 标签生成功能
+ * - categorizing: 分类匹配功能
  */
-export type AIFeature = 'naming' | 'translation' | 'writing';
+export type AIFeature = 'naming' | 'translation' | 'writing' | 'tagging' | 'categorizing';
 
 /**
  * 模型基本类型
@@ -729,6 +731,200 @@ export const DEFAULT_VOICE_SETTINGS: VoiceSettings = {
   overlayPosition: 'cursor',
 };
 
+// ============================================================================
+// 标签生成功能设置
+// ============================================================================
+
+/**
+ * 标签生成配置接口
+ */
+export interface TaggingConfig {
+  /** 是否启用标签生成功能 */
+  enabled: boolean;
+  /** 生成标签数量（推荐3-5个） */
+  tagCount: number;
+  /** 最小标签数量 */
+  minTagCount: number;
+  /** 最大标签数量 */
+  maxTagCount: number;
+  /** 标签生成的 Prompt 模板 */
+  promptTemplate: string;
+  /** 是否保留现有标签 */
+  preserveExistingTags: boolean;
+  /** 是否自动应用（false 则需要用户确认） */
+  autoApply: boolean;
+  /** 是否在命令面板中显示 */
+  showInCommandPalette: boolean;
+  /** 是否在编辑器右键菜单中显示 */
+  showInEditorMenu: boolean;
+  /** 是否在文件浏览器右键菜单中显示 */
+  showInFileMenu: boolean;
+}
+
+/**
+ * 默认标签生成 Prompt 模板
+ */
+export const DEFAULT_TAGGING_PROMPT_TEMPLATE = `# Role: 笔记标签生成专家
+
+## 任务
+请为以下笔记生成 {{tagCount}} 个相关标签。
+
+## 笔记内容
+{{content}}
+
+{{#if existingTags}}
+## 已有标签
+{{existingTags}}
+请不要重复这些标签。
+{{/if}}
+
+## 要求
+1. 标签简洁明了，2-4个字/词
+2. 涵盖主题、类型、领域等维度
+3. 使用中文或英文，避免特殊字符
+4. 不要重复已有标签
+5. 返回JSON格式: {"tags": ["标签1", "标签2", "标签3"]}
+
+## 注意
+- 只返回JSON，不要添加任何解释或前言
+- 标签应该能够帮助用户快速查找和分类笔记
+- 优先使用行业通用术语，避免过于个性化的标签
+
+请直接返回JSON格式的标签列表。`;
+
+/**
+ * 默认标签生成设置
+ */
+export const DEFAULT_TAGGING_SETTINGS: TaggingConfig = {
+  enabled: true,
+  tagCount: 5,
+  minTagCount: 3,
+  maxTagCount: 8,
+  promptTemplate: DEFAULT_TAGGING_PROMPT_TEMPLATE,
+  preserveExistingTags: true,
+  autoApply: false,
+  showInCommandPalette: true,
+  showInEditorMenu: true,
+  showInFileMenu: true,
+};
+
+// ============================================================================
+// 分类归档功能设置
+// ============================================================================
+
+/**
+ * 归档配置接口
+ */
+export interface ArchivingConfig {
+  /** 是否启用自动归档功能 */
+  enabled: boolean;
+  /** 归档基础文件夹路径（默认：03-归档区） */
+  baseFolder: string;
+  /** 是否允许创建新分类 */
+  createNewCategories: boolean;
+  /** 最小置信度阈值（0-1，默认0.8），低于此值会提示用户 */
+  minConfidence: number;
+  /** 是否同时移动附件 */
+  moveAttachments: boolean;
+  /** 是否自动更新双向链接 */
+  updateLinks: boolean;
+  /** 归档前是否需要用户确认 */
+  confirmBeforeArchive: boolean;
+  /** 分类匹配的 Prompt 模板 */
+  promptTemplate: string;
+  /** 是否在命令面板中显示 */
+  showInCommandPalette: boolean;
+  /** 是否在编辑器右键菜单中显示 */
+  showInEditorMenu: boolean;
+  /** 是否在文件浏览器右键菜单中显示 */
+  showInFileMenu: boolean;
+}
+
+/**
+ * 默认分类匹配 Prompt 模板
+ */
+export const DEFAULT_CATEGORIZING_PROMPT_TEMPLATE = `# Role: 笔记分类专家
+
+## 任务
+分析笔记内容，为其推荐最合适的归档分类。
+
+## 归档基础文件夹
+{{baseFolder}}
+
+## 现有分类结构
+{{folderTree}}
+
+## 笔记信息
+**文件名**: {{filename}}
+
+**内容**:
+{{content}}
+
+## 分类要求
+1. 分析笔记的主题、内容类型和关键信息
+2. 根据现有分类结构，推荐1-3个最合适的分类
+3. 为每个推荐提供置信度评分（0-1）和推理说明
+4. 如果现有分类都不合适且允许创建新分类（{{createNewCategories}}），可以建议创建新分类
+5. 置信度低于 {{minConfidence}} 的建议会被过滤掉
+
+## 返回格式
+必须返回以下JSON格式（不要添加任何其他文字）：
+
+\`\`\`json
+{
+  "suggestions": [
+    {
+      "path": "{{baseFolder}}/技术笔记/前端开发",
+      "name": "前端开发",
+      "confidence": 0.92,
+      "isNew": false,
+      "reasoning": "笔记内容主要讨论React组件开发和状态管理，与前端开发分类高度相关"
+    },
+    {
+      "path": "{{baseFolder}}/学习笔记/Web开发",
+      "name": "Web开发",
+      "confidence": 0.78,
+      "isNew": true,
+      "parentPath": "{{baseFolder}}/学习笔记",
+      "reasoning": "这是关于Web开发的学习笔记，可以创建新的Web开发子分类"
+    }
+  ]
+}
+\`\`\`
+
+## 字段说明
+- **path**: 完整的文件夹路径（包含基础文件夹）
+- **name**: 分类名称（最后一级文件夹名）
+- **confidence**: 置信度（0-1），表示匹配程度
+- **isNew**: 是否为新建分类（true/false）
+- **parentPath**: 如果是新建分类，指定父文件夹路径（可选）
+- **reasoning**: 推荐理由，解释为什么选择这个分类
+
+## 注意事项
+- 按置信度从高到低排序
+- 最多返回3个建议
+- 确保path使用正斜杠 / 分隔
+- 如果没有合适的分类建议，返回空数组：{"suggestions": []}
+
+现在请分析笔记并返回分类建议（仅返回JSON，不要其他内容）：`;
+
+/**
+ * 默认归档设置
+ */
+export const DEFAULT_ARCHIVING_SETTINGS: ArchivingConfig = {
+  enabled: false,
+  baseFolder: '03-归档区',
+  createNewCategories: true,
+  minConfidence: 0.8,
+  moveAttachments: true,
+  updateLinks: true,
+  confirmBeforeArchive: true,
+  promptTemplate: DEFAULT_CATEGORIZING_PROMPT_TEMPLATE,
+  showInCommandPalette: true,
+  showInEditorMenu: true,
+  showInFileMenu: true,
+};
+
 /**
  * 功能显示设置接口
  */
@@ -797,6 +993,8 @@ export interface SmartWorkflowSettings {
   translation: TranslationSettings; // 翻译功能设置
   voice: VoiceSettings;          // 语音输入设置
   serverConnection: ServerConnectionSettings; // 服务器连接设置
+  tagging: TaggingConfig;        // 标签生成设置
+  archiving: ArchivingConfig;    // 归档功能设置
 }
 
 /**
@@ -982,6 +1180,16 @@ export const DEFAULT_FEATURE_BINDINGS: Partial<Record<AIFeature, FeatureBinding>
     providerId: '',
     modelId: '',
     promptTemplate: DEFAULT_POLISH_PROMPT_TEMPLATE
+  },
+  tagging: {
+    providerId: '',
+    modelId: '',
+    promptTemplate: DEFAULT_TAGGING_PROMPT_TEMPLATE
+  },
+  categorizing: {
+    providerId: '',
+    modelId: '',
+    promptTemplate: DEFAULT_CATEGORIZING_PROMPT_TEMPLATE
   }
 };
 
@@ -1006,4 +1214,6 @@ export const DEFAULT_SETTINGS: SmartWorkflowSettings = {
   translation: DEFAULT_TRANSLATION_SETTINGS, // 翻译功能默认设置
   voice: DEFAULT_VOICE_SETTINGS, // 语音输入默认设置
   serverConnection: DEFAULT_SERVER_CONNECTION_SETTINGS, // 服务器连接默认设置
+  tagging: DEFAULT_TAGGING_SETTINGS, // 标签生成默认设置
+  archiving: DEFAULT_ARCHIVING_SETTINGS, // 归档功能默认设置
 };

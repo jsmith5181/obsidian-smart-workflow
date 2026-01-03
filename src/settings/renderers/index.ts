@@ -10,3 +10,4 @@ export { AdvancedSettingsRenderer } from './advancedSettingsRenderer';
 export { WritingSettingsRenderer } from './writingSettingsRenderer';
 export { TranslationSettingsRenderer } from './translationSettingsRenderer';
 export { VoiceSettingsRenderer } from './voiceSettingsRenderer';
+export { TaggingSettingsRenderer } from './taggingSettingsRenderer';

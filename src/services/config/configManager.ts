@@ -398,7 +398,7 @@ export class ConfigManager {
    * 重置引用指定供应商的功能绑定
    */
   private resetBindingsForProvider(providerId: string): void {
-    const features: AIFeature[] = ['naming', 'translation', 'writing'];
+    const features: AIFeature[] = ['naming', 'translation', 'writing', 'tagging', 'categorizing'];
     for (const feature of features) {
       const binding = this.settings.featureBindings[feature];
       if (binding?.providerId === providerId) {
@@ -429,7 +429,7 @@ export class ConfigManager {
    * 重置引用指定模型的功能绑定
    */
   private resetBindingsForModel(providerId: string, modelId: string): void {
-    const features: AIFeature[] = ['naming', 'translation', 'writing'];
+    const features: AIFeature[] = ['naming', 'translation', 'writing', 'tagging', 'categorizing'];
     for (const feature of features) {
       const binding = this.settings.featureBindings[feature];
       if (binding?.providerId === providerId && binding?.modelId === modelId) {

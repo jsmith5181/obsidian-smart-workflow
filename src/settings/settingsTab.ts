@@ -11,12 +11,13 @@ import { t } from '../i18n';
 // 从模块化文件导入
 import type { RendererContext } from './types';
 import { getSettingTabs } from './utils/settingsUtils';
-import { 
-  GeneralSettingsRenderer, 
-  NamingSettingsRenderer, 
-  TerminalSettingsRenderer, 
+import {
+  GeneralSettingsRenderer,
+  NamingSettingsRenderer,
+  TerminalSettingsRenderer,
   AdvancedSettingsRenderer,
-  VoiceSettingsRenderer
+  VoiceSettingsRenderer,
+  TaggingSettingsRenderer
 } from './renderers';
 
 /**
@@ -36,6 +37,7 @@ export class SmartWorkflowSettingTab extends PluginSettingTab {
   private terminalRenderer: TerminalSettingsRenderer;
   private advancedRenderer: AdvancedSettingsRenderer;
   private voiceRenderer: VoiceSettingsRenderer;
+  private taggingRenderer: TaggingSettingsRenderer;
 
   constructor(app: App, plugin: SmartWorkflowPlugin) {
     super(app, plugin);
@@ -51,6 +53,7 @@ export class SmartWorkflowSettingTab extends PluginSettingTab {
     this.terminalRenderer = new TerminalSettingsRenderer();
     this.advancedRenderer = new AdvancedSettingsRenderer();
     this.voiceRenderer = new VoiceSettingsRenderer();
+    this.taggingRenderer = new TaggingSettingsRenderer();
   }
 
   display(): void {
@@ -185,6 +188,9 @@ export class SmartWorkflowSettingTab extends PluginSettingTab {
         break;
       case 'naming':
         this.namingRenderer.render(context);
+        break;
+      case 'tagging':
+        this.taggingRenderer.render(context);
         break;
       case 'voice':
         this.voiceRenderer.render(context);
