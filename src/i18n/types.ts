@@ -87,8 +87,16 @@ export interface TranslationKeys {
     serverStartFailed: string;
     wsReconnectFailed: string;
     wsReconnectSuccess: string;
-    // 终端相关
-    terminal: {
+
+  // 聊天界面
+  chat: {
+    placeholder: string;
+    history: string;
+    newChat: string;
+  };
+
+  // 终端相关
+  terminal: {
       serverStarted: string;
       serverStopped: string;
       serverCrashed: string;
