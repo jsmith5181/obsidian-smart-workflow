@@ -6,9 +6,9 @@ mod router;
 
 // 功能模块
 pub mod pty;
-pub mod voice;  // 任务 3 迁移完成
-pub mod llm;    // 任务 5 实现
-pub mod utils;  // 任务 6 实现
+pub mod voice;
+pub mod llm;
+pub mod utils;
 
 use server::{Server, ServerConfig};
 use std::env;
