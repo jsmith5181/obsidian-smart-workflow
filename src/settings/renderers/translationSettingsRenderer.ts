@@ -25,11 +25,7 @@ export class TranslationSettingsRenderer extends BaseSettingsRenderer {
     const isExpanded = this.context.expandedSections.has('translation-feature-expanded');
     
     // 功能卡片
-    const translationCard = context.containerEl.createDiv();
-    translationCard.style.padding = '16px';
-    translationCard.style.borderRadius = '8px';
-    translationCard.style.backgroundColor = 'var(--background-secondary)';
-    translationCard.style.marginBottom = '10px';
+    const translationCard = context.containerEl.createDiv({ cls: 'settings-card' });
     
     // 可折叠标题
     const headerEl = translationCard.createDiv({ cls: 'feature-header' });

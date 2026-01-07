@@ -148,6 +148,8 @@ export interface TranslationKeys {
     tabs: {
       general: string;
       naming: string;
+      tagging: string;
+      autoArchive: string;
       writing: string;
       voice: string;
       terminal: string;
@@ -832,6 +834,192 @@ export interface TranslationKeys {
       hint: string;
       useRawText: string;
       retry: string;
+    };
+  };
+
+  // 标签生成功能
+  tagging: {
+    // 服务层消息
+    service: {
+      notEnabled: string;
+      emptyContent: string;
+      noAIConfig: string;
+      generateFailed: string;
+    };
+    // 设置
+    settings: {
+      title: string;
+      titleDesc: string;
+      modelConfig: string;
+      modelConfigDesc: string;
+      selectModel: string;
+      selectModelDesc: string;
+      notBound: string;
+      currentBinding: string;
+      notBoundWarning: string;
+      enabled: string;
+      enabledDesc: string;
+      tagCount: string;
+      tagCountDesc: string;
+      preserveExisting: string;
+      preserveExistingDesc: string;
+      autoApply: string;
+      autoApplyDesc: string;
+      visibility: string;
+      commandPalette: string;
+      commandPaletteDesc: string;
+      editorMenu: string;
+      editorMenuDesc: string;
+      fileMenu: string;
+      fileMenuDesc: string;
+      promptTemplate: string;
+      promptTemplateDesc: string;
+      resetToDefault: string;
+      resetToDefaultDesc: string;
+    };
+    // 弹窗
+    modal: {
+      title: string;
+      titleDesc: string;
+      addTag: string;
+      existingBadge: string;
+      inputPlaceholder: string;
+      delete: string;
+      cancel: string;
+      confirm: string;
+    };
+    // 命令和菜单
+    commands: {
+      generateTags: string;
+    };
+    // 通知消息
+    notices: {
+      generating: string;
+      generated: string;
+      applied: string;
+      cancelled: string;
+      failed: string;
+      noTags: string;
+    };
+  };
+
+  // 智能归档功能
+  archiving: {
+    // 服务层消息
+    service: {
+      notEnabled: string;
+      emptyContent: string;
+      noAIConfig: string;
+      folderNotExist: string;
+      targetNotExist: string;
+      fileExists: string;
+      categorizeFailed: string;
+      archiveFailed: string;
+    };
+    // 设置
+    settings: {
+      title: string;
+      titleDesc: string;
+      modelConfig: string;
+      selectModel: string;
+      selectModelDesc: string;
+      notBound: string;
+      currentBinding: string;
+      notBoundWarning: string;
+      enabled: string;
+      enabledDesc: string;
+      baseFolder: string;
+      baseFolderDesc: string;
+      baseFolderPlaceholder: string;
+      minConfidence: string;
+      minConfidenceDesc: string;
+      createNewCategories: string;
+      createNewCategoriesDesc: string;
+      confirmBeforeArchive: string;
+      confirmBeforeArchiveDesc: string;
+      moveAttachments: string;
+      moveAttachmentsDesc: string;
+      updateLinks: string;
+      updateLinksDesc: string;
+      visibility: string;
+      commandPalette: string;
+      commandPaletteDesc: string;
+      editorMenu: string;
+      editorMenuDesc: string;
+      fileMenu: string;
+      fileMenuDesc: string;
+      promptTemplate: string;
+      promptTemplateDesc: string;
+      resetToDefault: string;
+      resetToDefaultDesc: string;
+    };
+    // 弹窗
+    modal: {
+      title: string;
+      noSuggestions: string;
+      suggestionsDesc: string;
+      customPathTitle: string;
+      customPathDesc: string;
+      customPathPlaceholder: string;
+      newBadge: string;
+      cancel: string;
+      confirm: string;
+    };
+    // 命令和菜单
+    commands: {
+      archiveNote: string;
+    };
+    // 通知消息
+    notices: {
+      analyzing: string;
+      archiving: string;
+      archived: string;
+      cancelled: string;
+      failed: string;
+      noCategory: string;
+    };
+  };
+
+  // 自动归档功能
+  autoArchive: {
+    // 设置
+    settings: {
+      title: string;
+      titleDesc: string;
+      descriptionHtml: string;
+      mainSettings: string;
+      enabled: string;
+      enabledDesc: string;
+      triggerField: string;
+      triggerFieldDesc: string;
+      triggerFieldPlaceholder: string;
+      triggerStatus: string;
+      triggerStatusDesc: string;
+      triggerStatusPlaceholder: string;
+      generateTags: string;
+      generateTagsDesc: string;
+      performArchive: string;
+      performArchiveDesc: string;
+      advancedSettings: string;
+      debounceDelay: string;
+      debounceDelayDesc: string;
+      debounceDelayPlaceholder: string;
+      excludeFolders: string;
+      excludeFoldersDesc: string;
+      excludeFoldersPlaceholder: string;
+      exampleTitle: string;
+      exampleCode: string;
+      exampleNote: string;
+    };
+    // 通知消息
+    notices: {
+      reloadRequired: string;
+      processing: string;
+      tagsGenerated: string;
+      archived: string;
+      completed: string;
+      failed: string;
+      noCategory: string;
     };
   };
 

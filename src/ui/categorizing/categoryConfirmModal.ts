@@ -6,6 +6,7 @@
 
 import { App, Modal, Setting } from 'obsidian';
 import { CategorySuggestion } from '../../services/categorizing';
+import { t } from '../../i18n';
 
 /**
  * 分类确认对话框
@@ -38,18 +39,18 @@ export class CategoryConfirmModal extends Modal {
     contentEl.empty();
 
     // 标题
-    contentEl.createEl('h2', { text: '选择归档分类' });
+    contentEl.createEl('h2', { text: t('archiving.modal.title') });
 
     // 如果没有建议
     if (this.suggestions.length === 0) {
       contentEl.createEl('p', {
-        text: '没有找到合适的分类建议，您可以手动输入路径。',
+        text: t('archiving.modal.noSuggestions'),
         cls: 'mod-warning',
       });
     } else {
       // 显示建议说明
       contentEl.createEl('p', {
-        text: 'AI 为您推荐了以下分类，请选择一个：',
+        text: t('archiving.modal.suggestionsDesc'),
         cls: 'setting-item-description',
       });
 
@@ -69,23 +70,11 @@ export class CategoryConfirmModal extends Modal {
    */
   private renderSuggestions(containerEl: HTMLElement): void {
     const suggestionsContainer = containerEl.createDiv({ cls: 'category-suggestions' });
-    suggestionsContainer.style.marginBottom = '20px';
 
-    this.suggestions.forEach((suggestion, index) => {
-      const suggestionItem = suggestionsContainer.createDiv({ cls: 'category-suggestion-item' });
-      suggestionItem.style.padding = '12px';
-      suggestionItem.style.marginBottom = '8px';
-      suggestionItem.style.border = '1px solid var(--background-modifier-border)';
-      suggestionItem.style.borderRadius = '4px';
-      suggestionItem.style.cursor = 'pointer';
-      suggestionItem.style.transition = 'all 0.2s';
-
-      // 选中状态
-      if (this.selectedSuggestion === suggestion) {
-        suggestionItem.style.backgroundColor = 'var(--interactive-accent)';
-        suggestionItem.style.color = 'var(--text-on-accent)';
-        suggestionItem.style.borderColor = 'var(--interactive-accent)';
-      }
+    this.suggestions.forEach((suggestion) => {
+      const suggestionItem = suggestionsContainer.createDiv({ 
+        cls: `category-suggestion-item${this.selectedSuggestion === suggestion ? ' is-selected' : ''}`
+      });
 
       // 点击选择
       suggestionItem.addEventListener('click', () => {
@@ -94,60 +83,37 @@ export class CategoryConfirmModal extends Modal {
         this.onOpen(); // 重新渲染
       });
 
-      // 鼠标悬停效果
-      suggestionItem.addEventListener('mouseenter', () => {
-        if (this.selectedSuggestion !== suggestion) {
-          suggestionItem.style.backgroundColor = 'var(--background-modifier-hover)';
-        }
-      });
-
-      suggestionItem.addEventListener('mouseleave', () => {
-        if (this.selectedSuggestion !== suggestion) {
-          suggestionItem.style.backgroundColor = '';
-        }
-      });
+      // 鼠标悬停效果 - 由 CSS 处理
 
       // 分类名称和置信度
       const headerRow = suggestionItem.createDiv({ cls: 'suggestion-header' });
-      headerRow.style.display = 'flex';
-      headerRow.style.justifyContent = 'space-between';
-      headerRow.style.alignItems = 'center';
-      headerRow.style.marginBottom = '4px';
 
-      const nameEl = headerRow.createEl('strong', { text: suggestion.name });
-      nameEl.style.fontSize = '1.1em';
+      headerRow.createEl('strong', { text: suggestion.name });
 
-      const confidenceEl = headerRow.createEl('span', {
+      headerRow.createEl('span', {
         text: `${(suggestion.confidence * 100).toFixed(0)}%`,
       });
-      confidenceEl.style.fontSize = '0.9em';
-      confidenceEl.style.opacity = '0.8';
 
       // 路径
-      const pathEl = suggestionItem.createDiv({ text: suggestion.path });
-      pathEl.style.fontSize = '0.85em';
-      pathEl.style.opacity = '0.7';
-      pathEl.style.marginBottom = '4px';
+      suggestionItem.createDiv({ 
+        text: suggestion.path,
+        cls: 'suggestion-path'
+      });
 
       // 新建标记
       if (suggestion.isNew) {
-        const newBadge = suggestionItem.createEl('span', { text: '新建' });
-        newBadge.style.display = 'inline-block';
-        newBadge.style.padding = '2px 6px';
-        newBadge.style.fontSize = '0.75em';
-        newBadge.style.backgroundColor = 'var(--interactive-accent)';
-        newBadge.style.color = 'var(--text-on-accent)';
-        newBadge.style.borderRadius = '3px';
-        newBadge.style.marginRight = '6px';
+        suggestionItem.createEl('span', { 
+          text: t('archiving.modal.newBadge'),
+          cls: 'category-new-badge'
+        });
       }
 
       // AI推理说明
       if (suggestion.reasoning) {
-        const reasoningEl = suggestionItem.createDiv({ text: `💡 ${suggestion.reasoning}` });
-        reasoningEl.style.fontSize = '0.85em';
-        reasoningEl.style.opacity = '0.8';
-        reasoningEl.style.marginTop = '4px';
-        reasoningEl.style.fontStyle = 'italic';
+        suggestionItem.createDiv({ 
+          text: `💡 ${suggestion.reasoning}`,
+          cls: 'suggestion-reasoning'
+        });
       }
     });
   }
@@ -157,15 +123,13 @@ export class CategoryConfirmModal extends Modal {
    */
   private renderCustomPath(containerEl: HTMLElement): void {
     const customSection = containerEl.createDiv({ cls: 'category-custom-path' });
-    customSection.style.marginTop = '20px';
-    customSection.style.marginBottom = '20px';
 
     new Setting(customSection)
-      .setName('或手动输入路径')
-      .setDesc('输入完整的文件夹路径（例如：03-归档区/技术笔记）')
+      .setName(t('archiving.modal.customPathTitle'))
+      .setDesc(t('archiving.modal.customPathDesc'))
       .addText(text => {
         text
-          .setPlaceholder('例如：03-归档区/技术笔记')
+          .setPlaceholder(t('archiving.modal.customPathPlaceholder'))
           .setValue(this.customPath)
           .onChange(value => {
             this.customPath = value;
@@ -190,20 +154,16 @@ export class CategoryConfirmModal extends Modal {
    */
   private renderButtons(containerEl: HTMLElement): void {
     const buttonContainer = containerEl.createDiv({ cls: 'modal-button-container' });
-    buttonContainer.style.display = 'flex';
-    buttonContainer.style.justifyContent = 'flex-end';
-    buttonContainer.style.gap = '8px';
-    buttonContainer.style.marginTop = '20px';
 
     // 取消按钮
-    const cancelBtn = buttonContainer.createEl('button', { text: '取消' });
+    const cancelBtn = buttonContainer.createEl('button', { text: t('archiving.modal.cancel') });
     cancelBtn.addEventListener('click', () => {
       this.close();
     });
 
     // 确认按钮
     const confirmBtn = buttonContainer.createEl('button', {
-      text: '归档',
+      text: t('archiving.modal.confirm'),
       cls: 'mod-cta',
     });
     confirmBtn.addEventListener('click', () => {

@@ -9,10 +9,14 @@
  * @returns 卡片容器元素
  */
 export function createSettingCard(containerEl: HTMLElement): HTMLElement {
-  const card = containerEl.createDiv();
-  card.style.padding = '16px';
-  card.style.borderRadius = '8px';
-  card.style.backgroundColor = 'var(--background-secondary)';
-  card.style.marginBottom = '10px';
-  return card;
+  return containerEl.createDiv({ cls: 'settings-card' });
+}
+
+/**
+ * 创建带边框样式的卡片容器
+ * @param containerEl 父容器元素
+ * @returns 卡片容器元素
+ */
+export function createSettingCardBordered(containerEl: HTMLElement): HTMLElement {
+  return containerEl.createDiv({ cls: 'settings-card-bordered' });
 }

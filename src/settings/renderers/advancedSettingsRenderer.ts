@@ -33,11 +33,7 @@ export class AdvancedSettingsRenderer extends BaseSettingsRenderer {
    * 渲染性能与调试设置
    */
   private renderPerformanceSettings(containerEl: HTMLElement): void {
-    const performanceCard = containerEl.createDiv();
-    performanceCard.style.padding = '16px';
-    performanceCard.style.borderRadius = '8px';
-    performanceCard.style.backgroundColor = 'var(--background-secondary)';
-    performanceCard.style.marginBottom = '10px';
+    const performanceCard = containerEl.createDiv({ cls: 'settings-card' });
 
     new Setting(performanceCard)
       .setName(t('settingsDetails.advanced.performanceAndDebug'))
@@ -64,11 +60,7 @@ export class AdvancedSettingsRenderer extends BaseSettingsRenderer {
       this.context.plugin.settings.serverConnection = { ...DEFAULT_SERVER_CONNECTION_SETTINGS };
     }
     
-    const connectionCard = containerEl.createDiv();
-    connectionCard.style.padding = '16px';
-    connectionCard.style.borderRadius = '8px';
-    connectionCard.style.backgroundColor = 'var(--background-secondary)';
-    connectionCard.style.marginBottom = '10px';
+    const connectionCard = containerEl.createDiv({ cls: 'settings-card' });
 
     new Setting(connectionCard)
       .setName(t('settingsDetails.advanced.serverConnection'))

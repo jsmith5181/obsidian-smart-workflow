@@ -13,6 +13,7 @@ import { AIClient } from '../ai/aiClient';
 import { ConfigManager } from '../config/configManager';
 import { ServerManager } from '../server/serverManager';
 import { debugLog, errorLog } from '../../utils/logger';
+import { t } from '../../i18n';
 
 /**
  * 标签生成结果接口
@@ -63,7 +64,7 @@ export class TagService {
           allTags: [],
           existingTags: [],
           success: false,
-          error: '标签生成功能未启用',
+          error: t('tagging.service.notEnabled'),
         };
       }
 
@@ -76,7 +77,7 @@ export class TagService {
           allTags: [],
           existingTags: [],
           success: false,
-          error: '文件内容为空',
+          error: t('tagging.service.emptyContent'),
         };
       }
 
@@ -176,7 +177,7 @@ export class TagService {
       const config = this.configManager.resolveFeatureConfig('tagging');
 
       if (!config) {
-        throw new Error('未找到标签生成功能的AI配置，请先在设置中绑定AI供应商和模型');
+        throw new Error(t('tagging.service.noAIConfig'));
       }
 
       // 构建 Prompt
@@ -258,9 +259,9 @@ export class TagService {
 
       if (parsed.tags && Array.isArray(parsed.tags)) {
         return parsed.tags
-          .map((tag: any) => String(tag).trim())
-          .filter((tag: string) => tag.length > 0 && tag.length <= 20) // 限制标签长度
-          .slice(0, this.settings.tagging.maxTagCount); // 限制数量
+          .map((tag: any) => this.normalizeTag(String(tag)))
+          .filter((tag: string) => tag.length > 0)
+          .slice(0, this.settings.tagging.maxTagCount);
       }
     } catch (e) {
       // JSON解析失败，尝试其他格式
@@ -270,8 +271,8 @@ export class TagService {
     // 尝试按逗号或换行分隔
     const tags = aiResponse
       .split(/[,\n]/)
-      .map(tag => tag.trim().replace(/^[#\-\*]\s*/, '')) // 移除开头的 #, -, * 等
-      .filter(tag => tag.length > 0 && tag.length <= 20)
+      .map(tag => this.normalizeTag(tag.replace(/^[#\-\*]\s*/, '')))
+      .filter(tag => tag.length > 0)
       .slice(0, this.settings.tagging.maxTagCount);
 
     if (tags.length > 0) {

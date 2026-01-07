@@ -52,11 +52,7 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
    * 渲染 Shell 程序设置
    */
   private renderShellSettings(containerEl: HTMLElement): void {
-    const shellCard = containerEl.createDiv();
-    shellCard.style.padding = '16px';
-    shellCard.style.borderRadius = '8px';
-    shellCard.style.backgroundColor = 'var(--background-secondary)';
-    shellCard.style.marginBottom = '10px';
+    const shellCard = containerEl.createDiv({ cls: 'settings-card' });
 
     new Setting(shellCard)
       .setName(t('settingsDetails.terminal.shellSettings'))
@@ -149,11 +145,7 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
    * 渲染实例行为设置
    */
   private renderInstanceBehaviorSettings(containerEl: HTMLElement): void {
-    const instanceCard = containerEl.createDiv();
-    instanceCard.style.padding = '16px';
-    instanceCard.style.borderRadius = '8px';
-    instanceCard.style.backgroundColor = 'var(--background-secondary)';
-    instanceCard.style.marginBottom = '10px';
+    const instanceCard = containerEl.createDiv({ cls: 'settings-card' });
 
     new Setting(instanceCard)
       .setName(t('settingsDetails.terminal.instanceBehavior'))
@@ -219,11 +211,7 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
    * 渲染主题设置
    */
   private renderThemeSettings(containerEl: HTMLElement): void {
-    const themeCard = containerEl.createDiv();
-    themeCard.style.padding = '16px';
-    themeCard.style.borderRadius = '8px';
-    themeCard.style.backgroundColor = 'var(--background-secondary)';
-    themeCard.style.marginBottom = '10px';
+    const themeCard = containerEl.createDiv({ cls: 'settings-card' });
 
     new Setting(themeCard)
       .setName(t('settingsDetails.terminal.themeSettings'))
@@ -429,11 +417,7 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
    * 渲染外观设置
    */
   private renderAppearanceSettings(containerEl: HTMLElement): void {
-    const appearanceCard = containerEl.createDiv();
-    appearanceCard.style.padding = '16px';
-    appearanceCard.style.borderRadius = '8px';
-    appearanceCard.style.backgroundColor = 'var(--background-secondary)';
-    appearanceCard.style.marginBottom = '10px';
+    const appearanceCard = containerEl.createDiv({ cls: 'settings-card' });
 
     new Setting(appearanceCard)
       .setName(t('settingsDetails.terminal.appearanceSettings'))
@@ -511,11 +495,7 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
    * 渲染行为设置
    */
   private renderBehaviorSettings(containerEl: HTMLElement): void {
-    const behaviorCard = containerEl.createDiv();
-    behaviorCard.style.padding = '16px';
-    behaviorCard.style.borderRadius = '8px';
-    behaviorCard.style.backgroundColor = 'var(--background-secondary)';
-    behaviorCard.style.marginBottom = '10px';
+    const behaviorCard = containerEl.createDiv({ cls: 'settings-card' });
 
     new Setting(behaviorCard)
       .setName(t('settingsDetails.terminal.behaviorSettings'))
@@ -625,11 +605,7 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
    * 渲染功能显示设置
    */
   private renderVisibilitySettings(containerEl: HTMLElement): void {
-    const visibilityCard = containerEl.createDiv();
-    visibilityCard.style.padding = '16px';
-    visibilityCard.style.borderRadius = '8px';
-    visibilityCard.style.backgroundColor = 'var(--background-secondary)';
-    visibilityCard.style.marginBottom = '10px';
+    const visibilityCard = containerEl.createDiv({ cls: 'settings-card' });
 
     new Setting(visibilityCard)
       .setName(t('settingsDetails.terminal.visibilitySettings'))

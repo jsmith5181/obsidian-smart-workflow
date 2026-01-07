@@ -207,11 +207,7 @@ export class NamingSettingsRenderer extends BaseSettingsRenderer {
     const isNamingExpanded = this.context.expandedSections.has('naming-feature-expanded');
     
     // 功能卡片
-    const namingCard = containerEl.createDiv();
-    namingCard.style.padding = '16px';
-    namingCard.style.borderRadius = '8px';
-    namingCard.style.backgroundColor = 'var(--background-secondary)';
-    namingCard.style.marginBottom = '10px';
+    const namingCard = containerEl.createDiv({ cls: 'settings-card' });
     
     // 可折叠标题
     const headerEl = namingCard.createDiv({ cls: 'feature-header' });
@@ -446,11 +442,7 @@ export class NamingSettingsRenderer extends BaseSettingsRenderer {
     const isExpanded = this.context.expandedSections.has('selection-toolbar-expanded');
     
     // 功能卡片
-    const toolbarCard = containerEl.createDiv();
-    toolbarCard.style.padding = '16px';
-    toolbarCard.style.borderRadius = '8px';
-    toolbarCard.style.backgroundColor = 'var(--background-secondary)';
-    toolbarCard.style.marginBottom = '10px';
+    const toolbarCard = containerEl.createDiv({ cls: 'settings-card' });
     
     // 可折叠标题
     const headerEl = toolbarCard.createDiv({ cls: 'feature-header' });

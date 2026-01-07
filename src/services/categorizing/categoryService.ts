@@ -13,6 +13,7 @@ import { AIClient } from '../ai/aiClient';
 import { ConfigManager } from '../config/configManager';
 import { ServerManager } from '../server/serverManager';
 import { debugLog, errorLog } from '../../utils/logger';
+import { t } from '../../i18n';
 
 /**
  * 分类建议接口
@@ -91,7 +92,7 @@ export class CategoryService {
         return {
           suggestions: [],
           success: false,
-          error: '智能归档功能未启用',
+          error: t('archiving.service.notEnabled'),
         };
       }
 
@@ -99,15 +100,14 @@ export class CategoryService {
       const folderStructure = await this.scanArchiveFolder();
 
       // 检查归档文件夹是否存在
-      const folderExists = folderStructure.path === this.settings.archiving.baseFolder &&
-                           await this.categoryExists(this.settings.archiving.baseFolder);
+      const folderExists = await this.categoryExists(this.settings.archiving.baseFolder);
 
       // 如果文件夹不存在且不允许创建新分类，返回错误
       if (!folderExists && !this.settings.archiving.createNewCategories) {
         return {
           suggestions: [],
           success: false,
-          error: `归档文件夹"${this.settings.archiving.baseFolder}"不存在，且未启用创建新分类功能`,
+          error: t('archiving.service.folderNotExist', { folder: this.settings.archiving.baseFolder }),
         };
       }
 
@@ -136,7 +136,7 @@ export class CategoryService {
         return {
           suggestions: [],
           success: false,
-          error: '文件内容为空',
+          error: t('archiving.service.emptyContent'),
         };
       }
 
@@ -241,7 +241,7 @@ export class CategoryService {
       const config = this.configManager.resolveFeatureConfig('categorizing');
 
       if (!config) {
-        throw new Error('未找到分类功能的AI配置，请先在设置中绑定AI供应商和模型');
+        throw new Error(t('archiving.service.noAIConfig'));
       }
 
       // 构建 Prompt
@@ -342,23 +342,15 @@ export class CategoryService {
       // 尝试解析 JSON 格式
       const trimmed = aiResponse.trim();
 
-      debugLog('[CategoryService] 开始解析AI响应，长度:', trimmed.length);
-
       // 移除可能的 Markdown 代码块标记
       let jsonStr = trimmed
         .replace(/^```json?\n?/i, '')
         .replace(/\n?```$/, '');
 
-      debugLog('[CategoryService] 清理后的JSON字符串前200字符:', jsonStr.substring(0, 200));
-
       // 尝试解析 JSON
       const parsed = JSON.parse(jsonStr);
 
-      debugLog('[CategoryService] JSON解析成功');
-
       if (parsed.suggestions && Array.isArray(parsed.suggestions)) {
-        debugLog('[CategoryService] 找到suggestions数组，长度:', parsed.suggestions.length);
-
         const suggestions = parsed.suggestions
           .map((item: any) => {
             const suggestion: CategorySuggestion = {
@@ -382,7 +374,6 @@ export class CategoryService {
           .sort((a: CategorySuggestion, b: CategorySuggestion) => b.confidence - a.confidence) // 按置信度降序排序
           .slice(0, 3); // 最多返回3个建议
 
-        debugLog('[CategoryService] 过滤后的建议数量:', suggestions.length);
         return suggestions;
       } else {
         errorLog('[CategoryService] AI响应中没有suggestions字段或不是数组:', parsed);

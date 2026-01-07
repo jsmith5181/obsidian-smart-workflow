@@ -7,9 +7,10 @@
  * - 更新双向链接
  */
 
-import { TFile, TFolder, App, Notice } from 'obsidian';
+import { TFile, TFolder, App } from 'obsidian';
 import { SmartWorkflowSettings } from '../../settings/settings';
 import { debugLog, errorLog } from '../../utils/logger';
+import { t } from '../../i18n';
 
 /**
  * 归档选项接口
@@ -35,8 +36,6 @@ export interface ArchiveResult {
   newPath?: string;
   /** 移动的附件数量 */
   movedAttachments?: number;
-  /** 更新的链接数量 */
-  updatedLinks?: number;
   /** 错误信息（如果失败） */
   error?: string;
 }
@@ -70,7 +69,7 @@ export class ArchiveService {
       if (!targetFolder || !(targetFolder instanceof TFolder)) {
         return {
           success: false,
-          error: `目标文件夹不存在: ${options.targetPath}`,
+          error: t('archiving.service.targetNotExist', { path: options.targetPath }),
         };
       }
 
@@ -82,7 +81,7 @@ export class ArchiveService {
       if (existingFile) {
         return {
           success: false,
-          error: `目标路径已存在同名文件: ${newPath}`,
+          error: t('archiving.service.fileExists', { path: newPath }),
         };
       }
 
@@ -99,19 +98,12 @@ export class ArchiveService {
 
       debugLog('[ArchiveService] 文件移动成功:', newPath);
 
-      // 5. 更新链接（如果需要）
-      let updatedLinks = 0;
-      if (options.updateLinks && this.settings.archiving.updateLinks) {
-        // Obsidian 的 renameFile 会自动更新链接，这里只是记录
-        updatedLinks = await this.countBacklinks(file);
-        debugLog('[ArchiveService] 已自动更新链接:', updatedLinks);
-      }
+      // 5. Obsidian 的 renameFile 会自动更新所有双向链接，无需手动处理
 
       return {
         success: true,
         newPath,
         movedAttachments,
-        updatedLinks,
       };
     } catch (error) {
       errorLog('[ArchiveService] 归档失败:', error);
@@ -224,17 +216,6 @@ export class ArchiveService {
 
     const extension = file.extension.toLowerCase();
     return attachmentExtensions.includes(extension);
-  }
-
-  /**
-   * 统计文件的反向链接数量
-   * @param file 文件
-   * @returns 反向链接数量（Obsidian会自动更新链接，这里返回估算值）
-   */
-  private async countBacklinks(file: TFile): Promise<number> {
-    // Obsidian 的 renameFile 会自动更新所有链接
-    // 这里返回 0 表示不需要手动处理
-    return 0;
   }
 
   /**

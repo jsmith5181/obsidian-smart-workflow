@@ -26,11 +26,7 @@ export class WritingSettingsRenderer extends BaseSettingsRenderer {
     const isExpanded = this.context.expandedSections.has('writing-feature-expanded');
     
     // 功能卡片
-    const writingCard = context.containerEl.createDiv();
-    writingCard.style.padding = '16px';
-    writingCard.style.borderRadius = '8px';
-    writingCard.style.backgroundColor = 'var(--background-secondary)';
-    writingCard.style.marginBottom = '10px';
+    const writingCard = context.containerEl.createDiv({ cls: 'settings-card' });
     
     // 可折叠标题
     const headerEl = writingCard.createDiv({ cls: 'feature-header' });

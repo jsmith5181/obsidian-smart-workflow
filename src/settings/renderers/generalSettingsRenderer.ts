@@ -43,11 +43,7 @@ export class GeneralSettingsRenderer extends BaseSettingsRenderer {
    * 渲染供应商管理区域
    */
   private renderProviderManagement(containerEl: HTMLElement): void {
-    const providerCard = containerEl.createDiv();
-    providerCard.style.padding = '16px';
-    providerCard.style.borderRadius = '8px';
-    providerCard.style.backgroundColor = 'var(--background-secondary)';
-    providerCard.style.marginBottom = '10px';
+    const providerCard = containerEl.createDiv({ cls: 'settings-card' });
 
     // 供应商管理标题和添加按钮
     new Setting(providerCard)

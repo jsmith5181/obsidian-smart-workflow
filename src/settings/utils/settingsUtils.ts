@@ -37,8 +37,8 @@ export function getSettingTabs(): SettingTab[] {
   return [
     { id: 'general', name: t('settings.tabs.general'), icon: 'settings' },
     { id: 'naming', name: t('settings.tabs.naming'), icon: 'tag' },
-    { id: 'tagging', name: '标签生成', icon: 'tags' },
-    { id: 'autoArchive', name: '自动归档', icon: 'package' },
+    { id: 'tagging', name: t('settings.tabs.tagging'), icon: 'tags' },
+    { id: 'autoArchive', name: t('settings.tabs.autoArchive'), icon: 'package' },
     { id: 'voice', name: t('settings.tabs.voice'), icon: 'mic' },
     { id: 'terminal', name: t('settings.tabs.terminal'), icon: 'terminal' },
     { id: 'advanced', name: t('settings.tabs.advanced'), icon: 'sliders-horizontal' }

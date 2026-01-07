@@ -7,6 +7,7 @@ import { Setting } from 'obsidian';
 import type { RendererContext } from '../types';
 import { BaseSettingsRenderer } from './baseRenderer';
 import { DEFAULT_TAGGING_SETTINGS, DEFAULT_ARCHIVING_SETTINGS } from '../settings';
+import { t } from '../../i18n';
 
 /**
  * 标签生成设置渲染器
@@ -39,21 +40,17 @@ export class TaggingSettingsRenderer extends BaseSettingsRenderer {
     const currentProvider = resolvedConfig?.provider;
     const currentModel = resolvedConfig?.model;
 
-    const bindingCard = containerEl.createDiv();
-    bindingCard.style.padding = '16px';
-    bindingCard.style.borderRadius = '8px';
-    bindingCard.style.backgroundColor = 'var(--background-secondary)';
-    bindingCard.style.marginBottom = '10px';
+    const bindingCard = containerEl.createDiv({ cls: 'settings-card' });
 
     // 模型绑定设置标题
     new Setting(bindingCard)
-      .setName('AI 模型配置')
-      .setDesc('为标签生成功能绑定 AI 供应商和模型')
+      .setName(t('tagging.settings.modelConfig'))
+      .setDesc(t('tagging.settings.modelConfigDesc'))
       .setHeading();
 
     const bindingSetting = new Setting(bindingCard)
-      .setName('选择模型')
-      .setDesc('选择用于标签生成的 AI 模型（必须先在通用设置中添加供应商和模型）');
+      .setName(t('tagging.settings.selectModel'))
+      .setDesc(t('tagging.settings.selectModelDesc'));
 
     // 使用自定义 select 元素支持 optgroup
     bindingSetting.addDropdown(dropdown => {
@@ -66,7 +63,7 @@ export class TaggingSettingsRenderer extends BaseSettingsRenderer {
       // 添加空选项（不绑定）
       const emptyOption = selectEl.createEl('option', {
         value: '',
-        text: '未绑定'
+        text: t('tagging.settings.notBound')
       });
       emptyOption.setAttribute('value', '');
 
@@ -127,7 +124,7 @@ export class TaggingSettingsRenderer extends BaseSettingsRenderer {
         'background-color': 'var(--background-primary)',
         'border-radius': '4px'
       });
-      statusEl.setText(`当前使用：${currentProvider.name} / ${displayName}`);
+      statusEl.setText(t('tagging.settings.currentBinding', { provider: currentProvider.name, model: displayName }));
     } else {
       // 显示警告：未绑定模型
       const warningEl = bindingCard.createDiv({ cls: 'feature-binding-warning' });
@@ -140,7 +137,7 @@ export class TaggingSettingsRenderer extends BaseSettingsRenderer {
         'background-color': 'var(--background-primary)',
         'border-radius': '4px'
       });
-      warningEl.setText('⚠️ 未绑定 AI 模型，标签生成功能将无法使用。请先在「通用设置」中添加供应商和模型，然后在此处绑定。');
+      warningEl.setText(t('tagging.settings.notBoundWarning'));
     }
   }
 
@@ -153,23 +150,19 @@ export class TaggingSettingsRenderer extends BaseSettingsRenderer {
       this.context.plugin.settings.tagging = { ...DEFAULT_TAGGING_SETTINGS };
     }
 
-    const taggingCard = containerEl.createDiv();
-    taggingCard.style.padding = '16px';
-    taggingCard.style.borderRadius = '8px';
-    taggingCard.style.backgroundColor = 'var(--background-secondary)';
-    taggingCard.style.marginBottom = '10px';
+    const taggingCard = containerEl.createDiv({ cls: 'settings-card' });
 
     new Setting(taggingCard)
-      .setName('AI 标签生成')
-      .setDesc('使用AI自动为笔记生成相关标签')
+      .setName(t('tagging.settings.title'))
+      .setDesc(t('tagging.settings.titleDesc'))
       .setHeading();
 
     const settings = this.context.plugin.settings.tagging;
 
     // 启用标签生成
     new Setting(taggingCard)
-      .setName('启用标签生成')
-      .setDesc('开启后可以使用AI生成标签功能')
+      .setName(t('tagging.settings.enabled'))
+      .setDesc(t('tagging.settings.enabledDesc'))
       .addToggle(toggle => toggle
         .setValue(settings.enabled)
         .onChange(async (value) => {
@@ -184,8 +177,8 @@ export class TaggingSettingsRenderer extends BaseSettingsRenderer {
 
     // 标签数量
     new Setting(taggingCard)
-      .setName('生成标签数量')
-      .setDesc('AI每次生成的标签数量（推荐3-5个）')
+      .setName(t('tagging.settings.tagCount'))
+      .setDesc(t('tagging.settings.tagCountDesc'))
       .addSlider(slider => slider
         .setLimits(settings.minTagCount, settings.maxTagCount, 1)
         .setValue(settings.tagCount)
@@ -197,8 +190,8 @@ export class TaggingSettingsRenderer extends BaseSettingsRenderer {
 
     // 保留现有标签
     new Setting(taggingCard)
-      .setName('保留现有标签')
-      .setDesc('生成新标签时保留笔记中已有的标签')
+      .setName(t('tagging.settings.preserveExisting'))
+      .setDesc(t('tagging.settings.preserveExistingDesc'))
       .addToggle(toggle => toggle
         .setValue(settings.preserveExistingTags)
         .onChange(async (value) => {
@@ -208,8 +201,8 @@ export class TaggingSettingsRenderer extends BaseSettingsRenderer {
 
     // 自动应用
     new Setting(taggingCard)
-      .setName('自动应用标签')
-      .setDesc('关闭后会显示确认对话框，允许编辑后再应用')
+      .setName(t('tagging.settings.autoApply'))
+      .setDesc(t('tagging.settings.autoApplyDesc'))
       .addToggle(toggle => toggle
         .setValue(settings.autoApply)
         .onChange(async (value) => {
@@ -219,12 +212,12 @@ export class TaggingSettingsRenderer extends BaseSettingsRenderer {
 
     // 显示设置
     new Setting(taggingCard)
-      .setName('界面显示')
+      .setName(t('tagging.settings.visibility'))
       .setHeading();
 
     new Setting(taggingCard)
-      .setName('命令面板')
-      .setDesc('在命令面板中显示"生成AI标签"命令')
+      .setName(t('tagging.settings.commandPalette'))
+      .setDesc(t('tagging.settings.commandPaletteDesc'))
       .addToggle(toggle => toggle
         .setValue(settings.showInCommandPalette)
         .onChange(async (value) => {
@@ -233,8 +226,8 @@ export class TaggingSettingsRenderer extends BaseSettingsRenderer {
         }));
 
     new Setting(taggingCard)
-      .setName('编辑器右键菜单')
-      .setDesc('在编辑器右键菜单中显示"生成AI标签"选项')
+      .setName(t('tagging.settings.editorMenu'))
+      .setDesc(t('tagging.settings.editorMenuDesc'))
       .addToggle(toggle => toggle
         .setValue(settings.showInEditorMenu)
         .onChange(async (value) => {
@@ -243,8 +236,8 @@ export class TaggingSettingsRenderer extends BaseSettingsRenderer {
         }));
 
     new Setting(taggingCard)
-      .setName('文件浏览器右键菜单')
-      .setDesc('在文件浏览器右键菜单中显示"生成AI标签"选项')
+      .setName(t('tagging.settings.fileMenu'))
+      .setDesc(t('tagging.settings.fileMenuDesc'))
       .addToggle(toggle => toggle
         .setValue(settings.showInFileMenu)
         .onChange(async (value) => {
@@ -254,8 +247,8 @@ export class TaggingSettingsRenderer extends BaseSettingsRenderer {
 
     // Prompt模板
     new Setting(taggingCard)
-      .setName('Prompt 模板')
-      .setDesc('AI生成标签时使用的提示词模板（高级）')
+      .setName(t('tagging.settings.promptTemplate'))
+      .setDesc(t('tagging.settings.promptTemplateDesc'))
       .addTextArea(text => {
         text
           .setValue(settings.promptTemplate)
@@ -271,10 +264,10 @@ export class TaggingSettingsRenderer extends BaseSettingsRenderer {
 
     // 重置按钮
     new Setting(taggingCard)
-      .setName('重置为默认值')
-      .setDesc('恢复标签生成的所有默认设置')
+      .setName(t('tagging.settings.resetToDefault'))
+      .setDesc(t('tagging.settings.resetToDefaultDesc'))
       .addButton(button => button
-        .setButtonText('重置')
+        .setButtonText(t('common.reset'))
         .onClick(async () => {
           this.context.plugin.settings.tagging = { ...DEFAULT_TAGGING_SETTINGS };
           await this.saveSettings();
@@ -292,8 +285,8 @@ export class TaggingSettingsRenderer extends BaseSettingsRenderer {
     const currentModel = resolvedConfig?.model;
 
     const bindingSetting = new Setting(containerEl)
-      .setName('AI 模型')
-      .setDesc('选择用于分类匹配的 AI 模型');
+      .setName(t('archiving.settings.modelConfig'))
+      .setDesc(t('archiving.settings.selectModelDesc'));
 
     // 使用自定义 select 元素支持 optgroup
     bindingSetting.addDropdown(dropdown => {
@@ -306,7 +299,7 @@ export class TaggingSettingsRenderer extends BaseSettingsRenderer {
       // 添加空选项（不绑定）
       const emptyOption = selectEl.createEl('option', {
         value: '',
-        text: '未绑定'
+        text: t('archiving.settings.notBound')
       });
       emptyOption.setAttribute('value', '');
 
@@ -367,7 +360,7 @@ export class TaggingSettingsRenderer extends BaseSettingsRenderer {
         'background-color': 'var(--background-primary)',
         'border-radius': '4px'
       });
-      statusEl.setText(`当前使用：${currentProvider.name} / ${displayName}`);
+      statusEl.setText(t('archiving.settings.currentBinding', { provider: currentProvider.name, model: displayName }));
     } else {
       // 显示警告：未绑定模型
       const warningEl = containerEl.createDiv({ cls: 'feature-binding-warning' });
@@ -380,7 +373,7 @@ export class TaggingSettingsRenderer extends BaseSettingsRenderer {
         'background-color': 'var(--background-primary)',
         'border-radius': '4px'
       });
-      warningEl.setText('⚠️ 未绑定 AI 模型，智能归档功能将无法使用。请先在「通用设置」中添加供应商和模型，然后在此处绑定。');
+      warningEl.setText(t('archiving.settings.notBoundWarning'));
     }
   }
 
@@ -393,15 +386,11 @@ export class TaggingSettingsRenderer extends BaseSettingsRenderer {
       this.context.plugin.settings.archiving = { ...DEFAULT_ARCHIVING_SETTINGS };
     }
 
-    const archivingCard = containerEl.createDiv();
-    archivingCard.style.padding = '16px';
-    archivingCard.style.borderRadius = '8px';
-    archivingCard.style.backgroundColor = 'var(--background-secondary)';
-    archivingCard.style.marginBottom = '10px';
+    const archivingCard = containerEl.createDiv({ cls: 'settings-card' });
 
     new Setting(archivingCard)
-      .setName('智能归档')
-      .setDesc('使用AI自动匹配分类并归档笔记')
+      .setName(t('archiving.settings.title'))
+      .setDesc(t('archiving.settings.titleDesc'))
       .setHeading();
 
     const settings = this.context.plugin.settings.archiving;
@@ -411,8 +400,8 @@ export class TaggingSettingsRenderer extends BaseSettingsRenderer {
 
     // 启用归档
     new Setting(archivingCard)
-      .setName('启用智能归档')
-      .setDesc('开启后可以使用AI分类匹配和自动归档功能')
+      .setName(t('archiving.settings.enabled'))
+      .setDesc(t('archiving.settings.enabledDesc'))
       .addToggle(toggle => toggle
         .setValue(settings.enabled)
         .onChange(async (value) => {
@@ -427,10 +416,10 @@ export class TaggingSettingsRenderer extends BaseSettingsRenderer {
 
     // 归档基础文件夹
     new Setting(archivingCard)
-      .setName('归档基础文件夹')
-      .setDesc('笔记归档的目标文件夹路径')
+      .setName(t('archiving.settings.baseFolder'))
+      .setDesc(t('archiving.settings.baseFolderDesc'))
       .addText(text => text
-        .setPlaceholder('03-归档区')
+        .setPlaceholder(t('archiving.settings.baseFolderPlaceholder'))
         .setValue(settings.baseFolder)
         .onChange(async (value) => {
           settings.baseFolder = value;
@@ -439,8 +428,8 @@ export class TaggingSettingsRenderer extends BaseSettingsRenderer {
 
     // 最小置信度
     new Setting(archivingCard)
-      .setName('最小置信度')
-      .setDesc('AI匹配分类的最小置信度（0-1），低于此值会提示用户')
+      .setName(t('archiving.settings.minConfidence'))
+      .setDesc(t('archiving.settings.minConfidenceDesc'))
       .addSlider(slider => slider
         .setLimits(0.5, 1, 0.05)
         .setValue(settings.minConfidence)
@@ -452,8 +441,8 @@ export class TaggingSettingsRenderer extends BaseSettingsRenderer {
 
     // 允许创建新分类
     new Setting(archivingCard)
-      .setName('允许创建新分类')
-      .setDesc('当没有合适的分类时，是否允许AI创建新的分类文件夹')
+      .setName(t('archiving.settings.createNewCategories'))
+      .setDesc(t('archiving.settings.createNewCategoriesDesc'))
       .addToggle(toggle => toggle
         .setValue(settings.createNewCategories)
         .onChange(async (value) => {
@@ -463,8 +452,8 @@ export class TaggingSettingsRenderer extends BaseSettingsRenderer {
 
     // 归档前确认
     new Setting(archivingCard)
-      .setName('归档前确认')
-      .setDesc('归档文件前显示确认对话框')
+      .setName(t('archiving.settings.confirmBeforeArchive'))
+      .setDesc(t('archiving.settings.confirmBeforeArchiveDesc'))
       .addToggle(toggle => toggle
         .setValue(settings.confirmBeforeArchive)
         .onChange(async (value) => {
@@ -474,8 +463,8 @@ export class TaggingSettingsRenderer extends BaseSettingsRenderer {
 
     // 同时移动附件
     new Setting(archivingCard)
-      .setName('同时移动附件')
-      .setDesc('归档时将笔记的附件（图片、PDF等）一起移动')
+      .setName(t('archiving.settings.moveAttachments'))
+      .setDesc(t('archiving.settings.moveAttachmentsDesc'))
       .addToggle(toggle => toggle
         .setValue(settings.moveAttachments)
         .onChange(async (value) => {
@@ -485,8 +474,8 @@ export class TaggingSettingsRenderer extends BaseSettingsRenderer {
 
     // 自动更新链接
     new Setting(archivingCard)
-      .setName('自动更新链接')
-      .setDesc('归档后自动更新其他笔记中指向此笔记的双向链接')
+      .setName(t('archiving.settings.updateLinks'))
+      .setDesc(t('archiving.settings.updateLinksDesc'))
       .addToggle(toggle => toggle
         .setValue(settings.updateLinks)
         .onChange(async (value) => {
@@ -496,12 +485,12 @@ export class TaggingSettingsRenderer extends BaseSettingsRenderer {
 
     // 界面显示设置
     new Setting(archivingCard)
-      .setName('界面显示')
+      .setName(t('archiving.settings.visibility'))
       .setHeading();
 
     new Setting(archivingCard)
-      .setName('命令面板')
-      .setDesc('在命令面板中显示"智能归档笔记"命令')
+      .setName(t('archiving.settings.commandPalette'))
+      .setDesc(t('archiving.settings.commandPaletteDesc'))
       .addToggle(toggle => toggle
         .setValue(settings.showInCommandPalette)
         .onChange(async (value) => {
@@ -510,8 +499,8 @@ export class TaggingSettingsRenderer extends BaseSettingsRenderer {
         }));
 
     new Setting(archivingCard)
-      .setName('编辑器右键菜单')
-      .setDesc('在编辑器右键菜单中显示"智能归档"选项')
+      .setName(t('archiving.settings.editorMenu'))
+      .setDesc(t('archiving.settings.editorMenuDesc'))
       .addToggle(toggle => toggle
         .setValue(settings.showInEditorMenu)
         .onChange(async (value) => {
@@ -520,8 +509,8 @@ export class TaggingSettingsRenderer extends BaseSettingsRenderer {
         }));
 
     new Setting(archivingCard)
-      .setName('文件浏览器右键菜单')
-      .setDesc('在文件浏览器右键菜单中显示"智能归档"选项')
+      .setName(t('archiving.settings.fileMenu'))
+      .setDesc(t('archiving.settings.fileMenuDesc'))
       .addToggle(toggle => toggle
         .setValue(settings.showInFileMenu)
         .onChange(async (value) => {
@@ -531,8 +520,8 @@ export class TaggingSettingsRenderer extends BaseSettingsRenderer {
 
     // Prompt模板
     new Setting(archivingCard)
-      .setName('Prompt 模板')
-      .setDesc('AI分类匹配时使用的提示词模板（高级）')
+      .setName(t('archiving.settings.promptTemplate'))
+      .setDesc(t('archiving.settings.promptTemplateDesc'))
       .addTextArea(text => {
         text
           .setValue(settings.promptTemplate)
@@ -548,10 +537,10 @@ export class TaggingSettingsRenderer extends BaseSettingsRenderer {
 
     // 重置按钮
     new Setting(archivingCard)
-      .setName('重置为默认值')
-      .setDesc('恢复智能归档的所有默认设置')
+      .setName(t('archiving.settings.resetToDefault'))
+      .setDesc(t('archiving.settings.resetToDefaultDesc'))
       .addButton(button => button
-        .setButtonText('重置')
+        .setButtonText(t('common.reset'))
         .onClick(async () => {
           this.context.plugin.settings.archiving = { ...DEFAULT_ARCHIVING_SETTINGS };
           await this.saveSettings();

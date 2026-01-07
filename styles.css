@@ -3511,3 +3511,156 @@
     border: 1px solid currentColor;
   }
 }
+
+/* ==================== Settings Card Styles ==================== */
+/* 设置卡片公共样式 - 用于设置界面的卡片容器 */
+
+.settings-card {
+  padding: 16px;
+  border-radius: 8px;
+  background-color: var(--background-secondary);
+  margin-bottom: 16px;
+}
+
+/* 设置卡片变体 - 边框样式 */
+.settings-card-bordered {
+  padding: 16px;
+  border-radius: 8px;
+  background-color: var(--background-modifier-border);
+  margin-bottom: 16px;
+}
+
+
+/* ==================== Modal Common Styles ==================== */
+/* 弹窗公共样式 - 用于标签确认、分类确认等弹窗 */
+
+/* 弹窗按钮容器 */
+.modal-button-container {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+/* ==================== Tag Confirm Modal Styles ==================== */
+/* 标签确认弹窗样式 */
+
+/* 标签输入行 */
+.tag-input-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  position: relative;
+}
+
+/* 标签输入框 */
+.tag-input-row input[type="text"] {
+  flex: 1;
+  margin-right: 8px;
+  padding: 6px 12px;
+  border-radius: 4px;
+}
+
+/* 原有标签输入框样式 */
+.tag-input-row input[type="text"].is-existing {
+  padding-left: 50px;
+  background-color: var(--background-modifier-form-field-highlighted);
+  border: 1px solid var(--interactive-accent);
+}
+
+/* 原有标签标识徽章 */
+.tag-existing-badge {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-left: 8px;
+  font-size: 10px;
+  padding: 2px 6px;
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border-radius: 3px;
+  font-weight: bold;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ==================== Category Confirm Modal Styles ==================== */
+/* 分类确认弹窗样式 */
+
+/* 分类建议容器 */
+.category-suggestions {
+  margin-bottom: 20px;
+}
+
+/* 分类建议项 */
+.category-suggestion-item {
+  padding: 12px;
+  margin-bottom: 8px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.category-suggestion-item:hover {
+  background-color: var(--background-modifier-hover);
+}
+
+/* 分类建议项选中状态 */
+.category-suggestion-item.is-selected {
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border-color: var(--interactive-accent);
+}
+
+/* 分类建议头部行 */
+.category-suggestion-item .suggestion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+/* 分类名称 */
+.category-suggestion-item .suggestion-header strong {
+  font-size: 1.1em;
+}
+
+/* 置信度显示 */
+.category-suggestion-item .suggestion-header span {
+  font-size: 0.9em;
+  opacity: 0.8;
+}
+
+/* 分类路径 */
+.category-suggestion-item .suggestion-path {
+  font-size: 0.85em;
+  opacity: 0.7;
+  margin-bottom: 4px;
+}
+
+/* 新建标记徽章 */
+.category-suggestion-item .category-new-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  font-size: 0.75em;
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border-radius: 3px;
+  margin-right: 6px;
+}
+
+/* AI推理说明 */
+.category-suggestion-item .suggestion-reasoning {
+  font-size: 0.85em;
+  opacity: 0.8;
+  margin-top: 4px;
+  font-style: italic;
+}
+
+/* 自定义路径区域 */
+.category-custom-path {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}

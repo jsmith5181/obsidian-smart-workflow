@@ -41,8 +41,8 @@ export class TagConfirmModal extends Modal {
 
     // 标题
     new Setting(contentEl)
-      .setName('AI 生成的标签')
-      .setDesc('您可以编辑、添加或删除标签')
+      .setName(t('tagging.modal.title'))
+      .setDesc(t('tagging.modal.titleDesc'))
       .setHeading();
 
     // 标签列表容器
@@ -59,7 +59,7 @@ export class TagConfirmModal extends Modal {
     addButtonContainer.style.marginBottom = '16px';
 
     const addButton = addButtonContainer.createEl('button', {
-      text: '+ 添加标签',
+      text: t('tagging.modal.addTag'),
       cls: 'mod-cta'
     });
     addButton.style.marginRight = '8px';
@@ -71,12 +71,9 @@ export class TagConfirmModal extends Modal {
 
     // 按钮容器
     const buttonContainer = contentEl.createDiv({ cls: 'modal-button-container' });
-    buttonContainer.style.display = 'flex';
-    buttonContainer.style.justifyContent = 'flex-end';
-    buttonContainer.style.gap = '8px';
 
     // 取消按钮
-    const cancelButton = buttonContainer.createEl('button', { text: '取消' });
+    const cancelButton = buttonContainer.createEl('button', { text: t('tagging.modal.cancel') });
     cancelButton.addEventListener('click', () => {
       this.resolved = true;
       this.onCancel();
@@ -85,7 +82,7 @@ export class TagConfirmModal extends Modal {
 
     // 确认按钮
     const confirmButton = buttonContainer.createEl('button', {
-      text: '确认应用',
+      text: t('tagging.modal.confirm'),
       cls: 'mod-cta'
     });
     confirmButton.addEventListener('click', () => {
@@ -120,10 +117,6 @@ export class TagConfirmModal extends Modal {
 
     this.tags.forEach((tag, index) => {
       const tagRow = container.createDiv({ cls: 'tag-input-row' });
-      tagRow.style.display = 'flex';
-      tagRow.style.alignItems = 'center';
-      tagRow.style.marginBottom = '8px';
-      tagRow.style.position = 'relative'; // 添加相对定位
 
       // 检查是否是原有标签
       const isExisting = this.existingTags.has(tag.toLowerCase());
@@ -132,41 +125,23 @@ export class TagConfirmModal extends Modal {
       const input = tagRow.createEl('input', {
         type: 'text',
         value: tag,
-        placeholder: '输入标签...'
+        placeholder: t('tagging.modal.inputPlaceholder'),
+        cls: isExisting ? 'is-existing' : ''
       });
-      input.style.flex = '1';
-      input.style.marginRight = '8px';
-      input.style.padding = isExisting ? '6px 12px 6px 50px' : '6px 12px'; // 原有标签留出空间给标识
-      input.style.backgroundColor = isExisting ? 'var(--background-modifier-form-field-highlighted)' : '';
-      input.style.border = isExisting ? '1px solid var(--interactive-accent)' : '';
-      input.style.borderRadius = '4px';
 
       // 如果是原有标签，添加视觉标识
       if (isExisting) {
-        const existingBadge = tagRow.createEl('span', {
-          text: '原有',
+        tagRow.createEl('span', {
+          text: t('tagging.modal.existingBadge'),
           cls: 'tag-existing-badge'
         });
-        existingBadge.style.position = 'absolute';
-        existingBadge.style.left = '0';
-        existingBadge.style.top = '50%';
-        existingBadge.style.transform = 'translateY(-50%)';
-        existingBadge.style.marginLeft = '8px';
-        existingBadge.style.fontSize = '10px';
-        existingBadge.style.padding = '2px 6px';
-        existingBadge.style.backgroundColor = 'var(--interactive-accent)';
-        existingBadge.style.color = 'var(--text-on-accent)';
-        existingBadge.style.borderRadius = '3px';
-        existingBadge.style.fontWeight = 'bold';
-        existingBadge.style.pointerEvents = 'none';
-        existingBadge.style.zIndex = '1';
       }
 
       this.tagInputs.push(input);
 
       // 删除按钮
       const deleteButton = tagRow.createEl('button', {
-        text: '删除',
+        text: t('tagging.modal.delete'),
         cls: 'mod-warning'
       });
       deleteButton.addEventListener('click', () => {

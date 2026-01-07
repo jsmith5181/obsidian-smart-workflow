@@ -12,6 +12,7 @@ import { TagService } from '../tagging/tagService';
 import { CategoryService } from '../categorizing/categoryService';
 import { ArchiveService } from '../archiving/archiveService';
 import { debugLog, errorLog } from '../../utils/logger';
+import { t } from '../../i18n';
 
 /**
  * AutoArchiveService 类
@@ -116,7 +117,7 @@ export class AutoArchiveService {
         await this.executeAutoArchive(file);
       } catch (error) {
         errorLog('[AutoArchiveService] 自动归档执行失败:', error);
-        new Notice(`❌ 自动归档失败: ${error.message}`);
+        new Notice(t('autoArchive.notices.failed', { message: error instanceof Error ? error.message : String(error) }));
       } finally {
         this.debounceTimers.delete(file.path);
       }
@@ -138,7 +139,7 @@ export class AutoArchiveService {
     }
 
     debugLog('[AutoArchiveService] 开始自动归档流程:', file.path);
-    new Notice(`🤖 开始自动处理: ${file.basename}`);
+    new Notice(t('autoArchive.notices.processing', { filename: file.basename }));
 
     try {
       // 步骤1: 生成标签
@@ -162,7 +163,7 @@ export class AutoArchiveService {
         this.processedFiles.delete(firstKey);
       }
 
-      new Notice(`✅ 自动处理完成: ${file.basename}`);
+      new Notice(t('autoArchive.notices.completed', { filename: file.basename }));
       debugLog('[AutoArchiveService] 自动归档流程完成:', file.path);
     } catch (error) {
       errorLog('[AutoArchiveService] 自动归档流程失败:', error);
@@ -179,7 +180,7 @@ export class AutoArchiveService {
       const result = await this.tagService.generateTags(file);
 
       if (!result.success) {
-        throw new Error(result.error || '标签生成失败');
+        throw new Error(result.error || t('tagging.service.generateFailed'));
       }
 
       if (result.tags.length === 0) {
@@ -190,10 +191,10 @@ export class AutoArchiveService {
       // 应用标签
       await this.tagService.applyTags(file, result.allTags);
       debugLog('[AutoArchiveService] 已自动应用标签:', result.allTags);
-      new Notice(`🏷️ 已生成 ${result.tags.length} 个标签`);
+      new Notice(t('autoArchive.notices.tagsGenerated', { count: result.tags.length.toString() }));
     } catch (error) {
       errorLog('[AutoArchiveService] 自动生成标签失败:', error);
-      throw new Error(`标签生成失败: ${error.message}`);
+      throw new Error(t('tagging.notices.failed', { message: error instanceof Error ? error.message : String(error) }));
     }
   }
 
@@ -207,12 +208,12 @@ export class AutoArchiveService {
       const categoryResult = await this.categoryService.suggestCategory(file);
 
       if (!categoryResult.success) {
-        throw new Error(categoryResult.error || '分类分析失败');
+        throw new Error(categoryResult.error || t('archiving.service.categorizeFailed'));
       }
 
       if (categoryResult.suggestions.length === 0) {
         debugLog('[AutoArchiveService] 未找到归档分类,跳过');
-        new Notice('⚠️ 未找到合适的归档分类');
+        new Notice(t('autoArchive.notices.noCategory'));
         return;
       }
 
@@ -229,14 +230,14 @@ export class AutoArchiveService {
       });
 
       if (!archiveResult.success) {
-        throw new Error(archiveResult.error || '归档失败');
+        throw new Error(archiveResult.error || t('archiving.service.archiveFailed'));
       }
 
       debugLog('[AutoArchiveService] 文件归档成功:', archiveResult.newPath);
-      new Notice(`📁 已归档至: ${topSuggestion.name || topSuggestion.path}`);
+      new Notice(t('autoArchive.notices.archived', { path: topSuggestion.name || topSuggestion.path }));
     } catch (error) {
       errorLog('[AutoArchiveService] 自动归档失败:', error);
-      throw new Error(`归档失败: ${error.message}`);
+      throw new Error(t('archiving.notices.failed', { message: error instanceof Error ? error.message : String(error) }));
     }
   }
 
