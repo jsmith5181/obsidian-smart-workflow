@@ -71,6 +71,8 @@ export interface ASRConfig {
   fallback?: ASRProviderConfig;
   /** 是否启用自动兜底 */
   enable_fallback: boolean;
+  /** 是否启用音频反馈（提示音） */
+  enable_audio_feedback?: boolean;
 }
 
 // ============================================================================

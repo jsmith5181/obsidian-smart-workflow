@@ -867,7 +867,14 @@ export class ServerManager {
    * @param config 连接配置
    */
   updateConnectionConfig(config: Partial<ReconnectConfig>): void {
-    Object.assign(this.reconnectConfig, config);
-    debugLog('[ServerManager] 更新重连配置:', this.reconnectConfig);
+    // 检查配置是否有变化
+    const hasChanges = Object.entries(config).some(
+      ([key, value]) => this.reconnectConfig[key as keyof ReconnectConfig] !== value
+    );
+    
+    if (hasChanges) {
+      Object.assign(this.reconnectConfig, config);
+      debugLog('[ServerManager] 更新重连配置:', this.reconnectConfig);
+    }
   }
 }

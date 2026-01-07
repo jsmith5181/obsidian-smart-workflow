@@ -34,8 +34,10 @@ export interface AIClientOptions {
  * 用于发起 AI 请求
  */
 export interface AIRequestOptions {
-  /** 用户提示内容 */
-  prompt: string;
+  /** 用户提示内容（如果是单次交互） */
+  prompt?: string;
+  /** 完整的消息历史（如果是对话模式） - 优先于 prompt */
+  messages?: Array<{ role: string; content: string }>;
   /** 系统提示（可选） */
   systemPrompt?: string;
   /** 是否使用流式响应 */
@@ -309,7 +311,9 @@ export interface RequestBuilderOptions {
   /** 模型配置 */
   model: ModelConfig;
   /** 用户提示内容 */
-  prompt: string;
+  prompt?: string;
+  /** 完整的消息历史 */
+  messages?: Array<{ role: string; content: string }>;
   /** 系统提示（可选） */
   systemPrompt?: string;
   /** 是否流式响应 */

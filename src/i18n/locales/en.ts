@@ -73,7 +73,15 @@ export const en: TranslationKeys = {
     serverStartFailed: 'Server failed to start',
     wsReconnectFailed: 'WebSocket connection lost, max retry attempts reached\nPlease reload the plugin',
     wsReconnectSuccess: 'WebSocket reconnected successfully',
-    terminal: {
+
+  // Chat
+  chat: {
+    placeholder: 'Ask AI...',
+    history: 'Conversations',
+    newChat: 'New Chat',
+  },
+
+  terminal: {
       serverStarted: 'PTY server started',
       serverStopped: 'PTY server stopped',
       serverCrashed: 'PTY server crashed abnormally\nExit code: {{code}}, Signal: {{signal}}\nAttempting automatic restart...',

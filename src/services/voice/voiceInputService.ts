@@ -893,6 +893,7 @@ export class VoiceInputService implements IVoiceInputService {
         siliconflow_api_key: this.settings.primaryASR.siliconflow_api_key,
       },
       enable_fallback: this.settings.enableFallback,
+      enable_audio_feedback: this.settings.enableAudioFeedback,
     };
 
     if (this.settings.backupASR && this.settings.enableFallback) {

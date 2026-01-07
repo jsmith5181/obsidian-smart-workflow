@@ -73,6 +73,7 @@ pub struct ModuleMessage {
 
 impl ModuleMessage {
     /// 获取消息负载
+    #[allow(dead_code)]
     pub fn get_payload(&self) -> &serde_json::Value {
         &self.payload
     }
@@ -156,6 +157,7 @@ pub enum RouterError {
 #[async_trait::async_trait]
 pub trait ModuleHandler: Send + Sync {
     /// 获取模块类型
+    #[allow(dead_code)]
     fn module_type(&self) -> ModuleType;
     
     /// 处理消息
@@ -237,6 +239,7 @@ impl MessageRouter {
     /// 尝试从原始 JSON 中解析模块类型
     /// 
     /// 用于在消息解析失败时提取模块信息以便返回正确的错误响应
+    #[allow(dead_code)]
     pub fn try_parse_module(&self, text: &str) -> Option<ModuleType> {
         if let Ok(value) = serde_json::from_str::<serde_json::Value>(text) {
             if let Some(module_str) = value.get("module").and_then(|v| v.as_str()) {

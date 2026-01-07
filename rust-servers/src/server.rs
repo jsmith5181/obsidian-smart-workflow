@@ -273,6 +273,7 @@ pub async fn send_response(
 }
 
 /// 发送原始 JSON 消息
+#[allow(dead_code)]
 pub async fn send_json(
     ws_sender: &WsSender,
     json: &str,
@@ -283,6 +284,7 @@ pub async fn send_json(
 }
 
 /// 发送二进制消息
+#[allow(dead_code)]
 pub async fn send_binary(
     ws_sender: &WsSender,
     data: Vec<u8>,

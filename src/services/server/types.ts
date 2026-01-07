@@ -201,6 +201,8 @@ export interface StreamConfig {
   body: string;
   /** API 格式 */
   api_format: ApiFormat;
+  /** 请求 ID（用于关联响应） */
+  request_id?: string;
 }
 
 /**

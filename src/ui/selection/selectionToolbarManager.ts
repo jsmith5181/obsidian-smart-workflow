@@ -146,17 +146,19 @@ export class SelectionToolbarManager {
    * 销毁工具栏管理器，清理所有事件监听
    */
   destroy(): void {
-    if (!this.isInitialized) {
-      return;
-    }
-    
     debugLog('[SelectionToolbarManager] Destroying...');
     
     // 清除显示延迟定时器
     this.clearShowDelayTimeout();
     
-    // 停止选择监听
+    // 停止选择监听（无论是否已初始化都要尝试停止）
     this.selectionService.stopListening();
+    
+    // 如果未初始化，只需要停止监听即可
+    if (!this.isInitialized) {
+      debugLog('[SelectionToolbarManager] Was not initialized, only stopped listening');
+      return;
+    }
     
     // 移除事件监听
     document.removeEventListener('keydown', this.boundHandleKeyDown);
@@ -608,6 +610,12 @@ export class SelectionToolbarManager {
    */
   private handleSelectionChange(context: SelectionContext | null): void {
     debugLog('[SelectionToolbarManager] handleSelectionChange called, context:', context);
+    
+    // 检查功能是否启用
+    if (!this.settings.enabled) {
+      debugLog('[SelectionToolbarManager] Feature disabled, skipping');
+      return;
+    }
     
     if (!context) {
       // 选择被清除，隐藏工具栏

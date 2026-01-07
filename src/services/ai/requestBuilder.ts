@@ -55,7 +55,7 @@ export class RequestBuilder {
 
    */
   static buildChatCompletions(options: RequestBuilderOptions): ChatCompletionsRequest {
-    const { model, prompt, systemPrompt, stream } = options;
+    const { model, prompt, messages: historyMessages, systemPrompt, stream } = options;
 
     // 验证输出 token 限制
     RequestBuilder.validateOutputTokenLimit(model);
@@ -64,12 +64,21 @@ export class RequestBuilder {
     const messages: Array<{ role: string; content: string }> = [];
 
     // 如果有系统提示，添加 system 消息
+    // 注意：如果 historyMessages 中已经包含了 system 消息，这里可能会重复，
+    // 但通常 historyMessages 主要是 user/assistant 交互。
+    // 如果调用者已经手动构建了包含 system 的 messages，则不应再传 systemPrompt。
     if (systemPrompt && systemPrompt.trim()) {
       messages.push({ role: 'system', content: systemPrompt });
     }
 
-    // 添加用户消息
-    messages.push({ role: 'user', content: prompt });
+    if (historyMessages && historyMessages.length > 0) {
+      messages.push(...historyMessages);
+    }
+    
+    // 如果同时提供了 prompt，将其作为最新的 user 消息添加
+    if (prompt && prompt.trim()) {
+      messages.push({ role: 'user', content: prompt });
+    }
 
     const request: ChatCompletionsRequest = {
       model: model.name,
@@ -102,7 +111,7 @@ export class RequestBuilder {
 
    */
   static buildResponses(options: RequestBuilderOptions): ResponsesAPIRequest {
-    const { model, prompt, systemPrompt, stream } = options;
+    const { model, prompt, messages, systemPrompt, stream } = options;
 
     // 验证输出 token 限制
     RequestBuilder.validateOutputTokenLimit(model);
@@ -120,15 +129,24 @@ export class RequestBuilder {
     // Responses API 支持字符串或消息数组格式
     let input: string | Array<{ type: string; role?: string; content?: string }>;
 
-    if (systemPrompt && systemPrompt.trim()) {
+    if (messages && messages.length > 0) {
+        input = [];
+        if (systemPrompt && systemPrompt.trim()) {
+             input.push({ type: 'message', role: 'system', content: systemPrompt });
+        }
+        input.push(...messages.map(m => ({ type: 'message', role: m.role, content: m.content })));
+        if (prompt && prompt.trim()) {
+             input.push({ type: 'message', role: 'user', content: prompt });
+        }
+    } else if (systemPrompt && systemPrompt.trim()) {
       // 如果有系统提示，使用消息数组格式
       input = [
         { type: 'message', role: 'system', content: systemPrompt },
-        { type: 'message', role: 'user', content: prompt },
+        { type: 'message', role: 'user', content: prompt || '' },
       ];
     } else {
       // 否则使用简单字符串格式
-      input = prompt;
+      input = prompt || '';
     }
 
     const request: ResponsesAPIRequest = {
@@ -162,7 +180,7 @@ export class RequestBuilder {
 
    */
   static validate(options: RequestBuilderOptions): void {
-    const { model, prompt } = options;
+    const { model, prompt, messages } = options;
 
     // 验证模型配置
     if (!model) {
@@ -181,11 +199,14 @@ export class RequestBuilder {
       );
     }
 
-    // 验证 prompt
-    if (!prompt || prompt.trim() === '') {
+    // 验证 prompt 或 messages
+    const hasPrompt = prompt && prompt.trim() !== '';
+    const hasMessages = messages && messages.length > 0;
+
+    if (!hasPrompt && !hasMessages) {
       throw new AIError(
         AIErrorCode.INVALID_RESPONSE,
-        'Prompt is required and cannot be empty',
+        'Either prompt or messages is required',
         false
       );
     }

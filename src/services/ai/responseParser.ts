@@ -60,6 +60,7 @@ export class ResponseParser {
   /**
    * 解析 Chat Completions API 响应
    * 从 choices[0].message.content 提取内容
+   * 支持智谱 AI 等供应商的 reasoning_content 字段
    * @param response Chat Completions API 响应
    * @returns 解析后的响应
    * @throws InvalidResponseError 如果响应结构无效
@@ -83,29 +84,36 @@ export class ResponseParser {
 
     const choice = response.choices[0];
 
-    // 验证 message 和 content
-    if (!choice.message?.content) {
+    // 获取 content，可能为空字符串
+    const rawContent = choice.message?.content || '';
+
+    // 检查是否有 reasoning_content（智谱 AI / DeepSeek 风格）
+    // 直接从 message 中提取，因为 extractReasoningContent 期望完整响应对象
+    const message = choice.message as Record<string, unknown> | undefined;
+    const reasoningContent = (message?.reasoning_content as string) || '';
+
+    // 验证：content 和 reasoning_content 至少有一个非空
+    if (!rawContent && !reasoningContent) {
       throw new InvalidResponseError(
         t('aiService.missingContent'),
         response
       );
     }
 
-    const rawContent = choice.message.content;
-
     // 使用 ThinkingProcessor 处理思考内容
     const processed = ThinkingProcessor.process(rawContent);
 
-    // 检查是否有 DeepSeek 风格的 reasoning_content
-    const reasoningContent = ThinkingProcessor.extractReasoningContent(choice);
+    // 确定最终内容：优先使用 content，如果为空则使用 reasoning_content
+    const finalContent = processed.content || reasoningContent;
 
     // 构建解析结果
     const result: ParsedResponse = {
-      content: processed.content,
+      content: finalContent,
     };
 
-    // 如果有推理内容，添加到结果中
-    if (reasoningContent || processed.thinking) {
+    // 如果有推理内容且 content 也有内容，将推理内容作为摘要
+    // 如果 content 为空，reasoning_content 已作为主内容，不再重复添加
+    if (processed.content && (reasoningContent || processed.thinking)) {
       result.reasoningSummary = reasoningContent || processed.thinking;
     }
 

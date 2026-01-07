@@ -976,6 +976,7 @@ export interface FeatureVisibilitySettings {
   };
   // 终端功能
   terminal: {
+    enabled: boolean;                 // 是否启用终端功能（移动端默认关闭）
     showInCommandPalette: boolean;    // 命令面板
     showInRibbon: boolean;            // 侧边栏图标
     showInNewTab: boolean;            // 新标签页
@@ -1200,6 +1201,7 @@ export const DEFAULT_FEATURE_VISIBILITY: FeatureVisibilitySettings = {
     showInRibbon: true
   },
   terminal: {
+    enabled: true,  // 桌面端默认启用，移动端在 loadSettings 时会覆盖为 false
     showInCommandPalette: true,
     showInRibbon: true,
     showInNewTab: true

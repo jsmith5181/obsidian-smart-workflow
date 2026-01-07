@@ -52,7 +52,7 @@ git clone https://github.com/ZyphrZero/obsidian-smart-workflow.git
 cd obsidian-smart-workflow
 
 pnpm install
-pnpm build
+pnpm build         # 构建 TypeScript 服务
 pnpm build:rust    # 构建 Rust 服务器
 pnpm install:dev   # 安装到 Obsidian
 ```

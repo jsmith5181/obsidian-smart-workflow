@@ -206,6 +206,9 @@ impl VoiceHandler {
         state.recording_mode = Some(mode.clone());
         state.recording_start_time = Some(Instant::now());
         
+        // 根据配置设置音频反馈
+        state.beep_player.set_enabled(asr_config.enable_audio_feedback);
+        
         // 创建音频级别 channel
         let (audio_level_tx, mut audio_level_rx) = mpsc::unbounded_channel::<AudioLevelData>();
         state.audio_level_tx = Some(audio_level_tx.clone());

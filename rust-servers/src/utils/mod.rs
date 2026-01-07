@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tokio::sync::Mutex as TokioMutex;
 
-use crate::router::{ModuleMessage, ModuleType, RouterError, ServerResponse};
+use crate::router::{ModuleHandler, ModuleMessage, ModuleType, RouterError, ServerResponse};
 use crate::server::WsSender;
 use language::{LanguageDetector, LanguageDetectionResult};
 
@@ -100,25 +100,6 @@ impl UtilsHandler {
         let mut ws = self.ws_sender.lock().await;
         *ws = Some(sender);
     }
-
-    
-    /// 处理 Utils 模块消息
-    pub async fn handle(&self, msg: &ModuleMessage) -> Result<Option<ServerResponse>, RouterError> {
-        log_info!("Utils 模块处理消息: {}", msg.msg_type);
-        
-        match msg.msg_type.as_str() {
-            "detect_language" => {
-                self.handle_detect_language(msg).await
-            }
-            _ => {
-                log_error!("未知的 Utils 消息类型: {}", msg.msg_type);
-                Err(RouterError::ModuleError(format!(
-                    "Unknown Utils message type: {}",
-                    msg.msg_type
-                )))
-            }
-        }
-    }
     
     /// 处理语言检测请求
     async fn handle_detect_language(
@@ -162,6 +143,34 @@ impl UtilsHandler {
 impl Default for UtilsHandler {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+// ============================================================================
+// ModuleHandler 实现
+// ============================================================================
+
+#[async_trait::async_trait]
+impl ModuleHandler for UtilsHandler {
+    fn module_type(&self) -> ModuleType {
+        ModuleType::Utils
+    }
+    
+    async fn handle(&self, msg: &ModuleMessage) -> Result<Option<ServerResponse>, RouterError> {
+        log_info!("Utils 模块处理消息: {}", msg.msg_type);
+        
+        match msg.msg_type.as_str() {
+            "detect_language" => {
+                self.handle_detect_language(msg).await
+            }
+            _ => {
+                log_error!("未知的 Utils 消息类型: {}", msg.msg_type);
+                Err(RouterError::ModuleError(format!(
+                    "Unknown Utils message type: {}",
+                    msg.msg_type
+                )))
+            }
+        }
     }
 }
 

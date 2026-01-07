@@ -73,7 +73,15 @@ export const zhCN: TranslationKeys = {
     serverStartFailed: '服务器启动失败',
     wsReconnectFailed: 'WebSocket 连接断开，已达到最大重试次数\n请重新加载插件',
     wsReconnectSuccess: 'WebSocket 重连成功',
-    terminal: {
+
+  // Chat
+  chat: {
+    placeholder: '向 AI 提问...',
+    history: '对话历史',
+    newChat: '新建对话',
+  },
+
+  terminal: {
       serverStarted: 'PTY 服务器已启动',
       serverStopped: 'PTY 服务器已停止',
       serverCrashed: 'PTY 服务器异常崩溃\n退出码：{{code}}，信号：{{signal}}\n正在尝试自动重启...',

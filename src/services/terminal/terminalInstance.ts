@@ -161,7 +161,6 @@ export class TerminalInstance {
       scrollback: this.options.scrollback ?? 1000,
       allowTransparency: !!this.options.backgroundImage,
       convertEol: true,
-      windowsMode: false,
       rightClickSelectsWord: true,
       allowProposedApi: true,
     });

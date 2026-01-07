@@ -152,6 +152,14 @@ pub struct ASRConfig {
     pub fallback: Option<ASRProviderConfig>,
     /// 是否启用自动兜底
     pub enable_fallback: bool,
+    /// 是否启用音频反馈（提示音）
+    #[serde(default = "default_enable_audio_feedback")]
+    pub enable_audio_feedback: bool,
+}
+
+/// 默认启用音频反馈
+fn default_enable_audio_feedback() -> bool {
+    true
 }
 
 impl ASRConfig {
@@ -161,6 +169,7 @@ impl ASRConfig {
             primary,
             fallback: None,
             enable_fallback: false,
+            enable_audio_feedback: true,
         }
     }
     
@@ -170,6 +179,7 @@ impl ASRConfig {
             primary,
             fallback: Some(fallback),
             enable_fallback: true,
+            enable_audio_feedback: true,
         }
     }
     
