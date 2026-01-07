@@ -137,7 +137,9 @@ export const zhCN: TranslationKeys = {
   settings: {
     tabs: {
       general: '模型服务',
+      aiFeatures: 'AI 功能',
       naming: '功能设置',
+      fileNaming: '文件名生成',
       tagging: '标签生成',
       autoArchive: '自动归档',
       writing: '写作',

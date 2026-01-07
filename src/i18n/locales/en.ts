@@ -137,7 +137,9 @@ export const en: TranslationKeys = {
   settings: {
     tabs: {
       general: 'Model Services',
+      aiFeatures: 'AI Features',
       naming: 'Features',
+      fileNaming: 'File Naming',
       tagging: 'Tag Generation',
       autoArchive: 'Auto Archive',
       writing: 'Writing',

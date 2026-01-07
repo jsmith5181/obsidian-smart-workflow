@@ -42,10 +42,18 @@ export function validateShellPath(path: string): boolean {
 export function getSettingTabs(): SettingTab[] {
   const tabs: SettingTab[] = [
     { id: 'general', name: t('settings.tabs.general'), icon: 'settings' },
-    { id: 'naming', name: t('settings.tabs.naming'), icon: 'tag' },
-    { id: 'tagging', name: t('settings.tabs.tagging'), icon: 'tags' },
-    { id: 'autoArchive', name: t('settings.tabs.autoArchive'), icon: 'package' },
-    { id: 'voice', name: t('settings.tabs.voice'), icon: 'mic' },
+    { 
+      id: 'ai-features', 
+      name: t('settings.tabs.aiFeatures'), 
+      icon: 'sparkles',
+      children: [
+        { id: 'naming', name: t('settings.tabs.naming'), icon: 'layout-list' },
+        { id: 'fileNaming', name: t('settings.tabs.fileNaming'), icon: 'file-signature' },
+        { id: 'tagging', name: t('settings.tabs.tagging'), icon: 'tags' },
+        { id: 'autoArchive', name: t('settings.tabs.autoArchive'), icon: 'package' },
+        { id: 'voice', name: t('settings.tabs.voice'), icon: 'mic' },
+      ]
+    },
     { id: 'terminal', name: t('settings.tabs.terminal'), icon: 'terminal' },
     { id: 'advanced', name: t('settings.tabs.advanced'), icon: 'sliders-horizontal' }
   ];
@@ -56,6 +64,40 @@ export function getSettingTabs(): SettingTab[] {
   }
   
   return tabs;
+}
+
+/**
+ * 获取所有标签页 ID（包括子菜单）
+ * 用于验证 activeTab 是否有效
+ */
+export function getAllTabIds(): string[] {
+  const ids: string[] = [];
+  const collectIds = (tabs: SettingTab[]) => {
+    tabs.forEach(tab => {
+      if (tab.children && tab.children.length > 0) {
+        collectIds(tab.children);
+      } else {
+        ids.push(tab.id);
+      }
+    });
+  };
+  collectIds(getSettingTabs());
+  return ids;
+}
+
+/**
+ * 查找标签页所属的父级分组 ID
+ * @param tabId 标签页 ID
+ * @returns 父级分组 ID，如果没有父级则返回 null
+ */
+export function findParentGroupId(tabId: string): string | null {
+  for (const tab of getSettingTabs()) {
+    if (tab.children) {
+      const found = tab.children.find(child => child.id === tabId);
+      if (found) return tab.id;
+    }
+  }
+  return null;
 }
 
 /**

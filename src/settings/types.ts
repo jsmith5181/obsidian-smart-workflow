@@ -85,6 +85,8 @@ export interface SettingTab {
   name: string;
   /** 标签页图标名称（Obsidian 图标） */
   icon: string;
+  /** 子菜单项（可选） */
+  children?: SettingTab[];
 }
 
 /**

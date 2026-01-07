@@ -155,7 +155,9 @@ export interface TranslationKeys {
   settings: {
     tabs: {
       general: string;
+      aiFeatures: string;
       naming: string;
+      fileNaming: string;
       tagging: string;
       autoArchive: string;
       writing: string;
