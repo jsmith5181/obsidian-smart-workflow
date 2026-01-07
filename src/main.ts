@@ -890,7 +890,8 @@ export default class SmartWorkflowPlugin extends Plugin {
           },
           () => {
             NoticeHelper.info('已取消标签应用');
-          }
+          },
+          result.existingTags // 传入原有标签用于标识
         ).open();
       }
     } catch (error) {

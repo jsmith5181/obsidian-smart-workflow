@@ -22,6 +22,8 @@ export interface TagGenerationResult {
   tags: string[];
   /** 合并后的完整标签列表（包含原有标签） */
   allTags: string[];
+  /** 原有标签列表 */
+  existingTags: string[];
   /** 是否成功 */
   success: boolean;
   /** 错误信息（如果失败） */
@@ -59,6 +61,7 @@ export class TagService {
         return {
           tags: [],
           allTags: [],
+          existingTags: [],
           success: false,
           error: '标签生成功能未启用',
         };
@@ -71,6 +74,7 @@ export class TagService {
         return {
           tags: [],
           allTags: [],
+          existingTags: [],
           success: false,
           error: '文件内容为空',
         };
@@ -94,6 +98,7 @@ export class TagService {
       return {
         tags: newTags,
         allTags,
+        existingTags,
         success: true,
       };
     } catch (error) {
@@ -101,6 +106,7 @@ export class TagService {
       return {
         tags: [],
         allTags: [],
+        existingTags: [],
         success: false,
         error: error instanceof Error ? error.message : String(error),
       };

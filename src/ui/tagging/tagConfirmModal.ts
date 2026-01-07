@@ -11,6 +11,7 @@ import { t } from '../../i18n';
  */
 export class TagConfirmModal extends Modal {
   private tags: string[];
+  private existingTags: Set<string>; // 原有标签集合
   private onConfirm: (tags: string[]) => void;
   private onCancel: () => void;
   private resolved = false;
@@ -20,10 +21,12 @@ export class TagConfirmModal extends Modal {
     app: App,
     tags: string[],
     onConfirm: (tags: string[]) => void,
-    onCancel?: () => void
+    onCancel?: () => void,
+    existingTags: string[] = [] // 新增：原有标签参数
   ) {
     super(app);
     this.tags = [...tags]; // 复制数组，避免直接修改
+    this.existingTags = new Set(existingTags.map(t => t.toLowerCase())); // 存储原有标签（小写用于比较）
     this.onConfirm = onConfirm;
     this.onCancel = onCancel || (() => {});
   }
@@ -120,6 +123,10 @@ export class TagConfirmModal extends Modal {
       tagRow.style.display = 'flex';
       tagRow.style.alignItems = 'center';
       tagRow.style.marginBottom = '8px';
+      tagRow.style.position = 'relative'; // 添加相对定位
+
+      // 检查是否是原有标签
+      const isExisting = this.existingTags.has(tag.toLowerCase());
 
       // 标签输入框
       const input = tagRow.createEl('input', {
@@ -129,7 +136,31 @@ export class TagConfirmModal extends Modal {
       });
       input.style.flex = '1';
       input.style.marginRight = '8px';
-      input.style.padding = '6px 12px';
+      input.style.padding = isExisting ? '6px 12px 6px 50px' : '6px 12px'; // 原有标签留出空间给标识
+      input.style.backgroundColor = isExisting ? 'var(--background-modifier-form-field-highlighted)' : '';
+      input.style.border = isExisting ? '1px solid var(--interactive-accent)' : '';
+      input.style.borderRadius = '4px';
+
+      // 如果是原有标签，添加视觉标识
+      if (isExisting) {
+        const existingBadge = tagRow.createEl('span', {
+          text: '原有',
+          cls: 'tag-existing-badge'
+        });
+        existingBadge.style.position = 'absolute';
+        existingBadge.style.left = '0';
+        existingBadge.style.top = '50%';
+        existingBadge.style.transform = 'translateY(-50%)';
+        existingBadge.style.marginLeft = '8px';
+        existingBadge.style.fontSize = '10px';
+        existingBadge.style.padding = '2px 6px';
+        existingBadge.style.backgroundColor = 'var(--interactive-accent)';
+        existingBadge.style.color = 'var(--text-on-accent)';
+        existingBadge.style.borderRadius = '3px';
+        existingBadge.style.fontWeight = 'bold';
+        existingBadge.style.pointerEvents = 'none';
+        existingBadge.style.zIndex = '1';
+      }
 
       this.tagInputs.push(input);
 

@@ -98,11 +98,32 @@ export class CategoryService {
       // 1. 扫描归档区文件夹结构
       const folderStructure = await this.scanArchiveFolder();
 
-      if (folderStructure.children.length === 0) {
+      // 检查归档文件夹是否存在
+      const folderExists = folderStructure.path === this.settings.archiving.baseFolder &&
+                           await this.categoryExists(this.settings.archiving.baseFolder);
+
+      // 如果文件夹不存在且不允许创建新分类，返回错误
+      if (!folderExists && !this.settings.archiving.createNewCategories) {
         return {
           suggestions: [],
           success: false,
-          error: `归档文件夹"${this.settings.archiving.baseFolder}"不存在或为空`,
+          error: `归档文件夹"${this.settings.archiving.baseFolder}"不存在，且未启用创建新分类功能`,
+        };
+      }
+
+      // 如果文件夹存在但没有子文件夹，且不允许创建新分类，建议直接归档到根目录
+      if (folderExists && folderStructure.children.length === 0 && !this.settings.archiving.createNewCategories) {
+        // 添加一个默认建议：归档到基础文件夹
+        const defaultSuggestion: CategorySuggestion = {
+          path: this.settings.archiving.baseFolder,
+          confidence: 0.8,
+          name: this.settings.archiving.baseFolder.split('/').pop() || this.settings.archiving.baseFolder,
+          isNew: false,
+          reasoning: '归档目录下暂无子分类，建议直接归档到此目录',
+        };
+        return {
+          suggestions: [defaultSuggestion],
+          success: true,
         };
       }
 
